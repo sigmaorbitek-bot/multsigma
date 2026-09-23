@@ -1,0 +1,25 @@
+.categoria-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.categoria-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid var(--cor-borda);
+}
+
+@media (max-width: 600px) {
+  .categoria-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .categoria-form-actions button {
+    width: 100%;
+  }
+}
