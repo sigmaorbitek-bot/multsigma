@@ -1,0 +1,82 @@
+.leitor-codigo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.leitor-video-wrapper {
+  position: relative;
+
+  width: 100%;
+  overflow: hidden;
+
+  aspect-ratio: 4 / 3;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: #000000;
+}
+
+.leitor-video {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+.leitor-mira {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  pointer-events: none;
+}
+
+.leitor-mira::before {
+  content: "";
+
+  width: min(82%, 420px);
+  height: 130px;
+
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+}
+
+.leitor-mira span {
+  position: absolute;
+
+  width: min(74%, 380px);
+  height: 2px;
+
+  background: var(--cor-primaria);
+}
+
+.leitor-instrucao {
+  margin: 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 14px;
+  text-align: center;
+}
+
+.leitor-codigo-erro {
+  padding: 14px;
+
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  border-radius: var(--raio-pequeno);
+
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+
+  font-size: 14px;
+  line-height: 1.5;
+}

@@ -17,23 +17,25 @@
 
 .produtos-header p {
   margin: 0;
-
   color: var(--cor-texto-secundario);
 }
 
+/*    FILTROS
+*/
+
 .produtos-filtros {
   display: grid;
-
   grid-template-columns:
     minmax(220px, 1fr)
-    minmax(180px, 260px);
-
+    minmax(180px, 260px)
+    minmax(180px, 220px);
   gap: 12px;
 }
 
 .produtos-filtros input,
 .produtos-filtros select {
   width: 100%;
+  min-height: 42px;
 
   padding: 11px 12px;
 
@@ -41,53 +43,13 @@
   border-radius: var(--raio-pequeno);
 
   background: var(--cor-superficie);
+  color: var(--cor-texto);
 
   font: inherit;
 }
 
-.produtos-table-wrapper {
-  overflow-x: auto;
-
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-medio);
-
-  background: var(--cor-superficie);
-}
-
-.produtos-table {
-  width: 100%;
-  min-width: 800px;
-
-  border-collapse: collapse;
-}
-
-.produtos-table th,
-.produtos-table td {
-  padding: 14px 16px;
-
-  text-align: left;
-
-  border-bottom: 1px solid var(--cor-borda);
-}
-
-.produtos-table th {
-  font-size: 13px;
-  color: var(--cor-texto-secundario);
-}
-
-.produtos-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.produtos-table td:first-child {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.produtos-table small {
-  color: var(--cor-texto-secundario);
-}
+/*    ESTADOS
+*/
 
 .produtos-status,
 .produtos-vazio {
@@ -109,10 +71,408 @@
   margin-top: 0;
 }
 
+.produtos-vazio p {
+  margin-bottom: 0;
+  color: var(--cor-texto-secundario);
+}
+
+/*    GRID DE PRODUTOS
+*/
+
+.produtos-mobile-list {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.produto-mobile-card {
+  min-width: 0;
+
+  padding: 16px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.produto-mobile-card:hover {
+  transform: translateY(-2px);
+
+  border-color: color-mix(in srgb, var(--cor-primaria) 28%, var(--cor-borda));
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+/*    TOPO DO CARD
+*/
+
+.produto-mobile-topo {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.produto-lista-imagem,
+.produto-lista-sem-imagem {
+  width: 58px;
+  height: 58px;
+
+  flex-shrink: 0;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+}
+
+.produto-lista-imagem {
+  object-fit: cover;
+
+  background: #ffffff;
+}
+
+.produto-lista-sem-imagem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--cor-fundo);
+
+  font-size: 21px;
+}
+
+.produto-lista-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.produto-mobile-topo .produto-lista-info {
+  flex: 1;
+}
+
+.produto-lista-info strong {
+  color: var(--cor-texto);
+
+  font-size: 15px;
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+}
+
+.produto-lista-info small,
+.produto-lista-info span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+
+  overflow-wrap: anywhere;
+}
+
+/*    DADOS DO CARD
+*/
+
+.produto-mobile-dados {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 14px 12px;
+
+  margin-bottom: 16px;
+}
+
+.produto-mobile-dado {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.produto-mobile-dado > span:first-child {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+  font-weight: 500;
+
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.produto-mobile-dado strong {
+  min-width: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 14px;
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+}
+
+/*    STATUS
+*/
+
+.produto-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.produto-status-ativo {
+  background: rgba(22, 163, 74, 0.1);
+
+  color: #16a34a;
+}
+
+.produto-status-inativo {
+  background: rgba(107, 114, 128, 0.12);
+
+  color: var(--cor-texto-secundario);
+}
+
+/*    AÇÕES DO CARD
+*/
+
+.produto-mobile-acoes {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+
+  padding-top: 14px;
+
+  border-top: 1px solid var(--cor-borda);
+}
+
+.produto-mobile-acoes button {
+  width: 100%;
+}
+
+.produto-editar-button,
+.produto-status-button,
+.produto-excluir-button {
+  min-height: 38px;
+
+  padding: 8px 14px;
+
+  border-radius: var(--raio-pequeno);
+
+  background: transparent;
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.produto-editar-button {
+  border: 1px solid var(--cor-borda);
+
+  background: var(--cor-superficie);
+
+  color: var(--cor-primaria);
+}
+
+.produto-editar-button:hover {
+  border-color: var(--cor-primaria);
+
+  background: color-mix(in srgb, var(--cor-primaria) 8%, transparent);
+}
+
+.produto-status-button {
+  border: 1px solid var(--cor-borda);
+
+  color: var(--cor-texto);
+}
+
+.produto-status-button:hover {
+  border-color: var(--cor-primaria);
+
+  color: var(--cor-primaria);
+
+  background: color-mix(in srgb, var(--cor-primaria) 6%, transparent);
+}
+
+.produto-excluir-button {
+  grid-column: 1 / -1;
+
+  border: 1px solid #dc2626;
+
+  color: #dc2626;
+}
+
+.produto-excluir-button:hover {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+/*    MODAL STATUS
+*/
+
+.produto-confirmacao {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.produto-confirmacao p {
+  margin: 0;
+}
+
+.produto-confirmacao-aviso {
+  color: var(--cor-texto-secundario);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.produto-confirmacao-acoes {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding-top: 16px;
+
+  border-top: 1px solid var(--cor-borda);
+}
+
+/*    MODAL EXCLUSÃO
+*/
+
+.produto-exclusao {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.produto-exclusao p {
+  margin: 0;
+}
+
+.produto-exclusao-aviso {
+  color: var(--cor-texto-secundario);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.produto-exclusao-acoes {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding-top: 16px;
+
+  border-top: 1px solid var(--cor-borda);
+}
+
+.produto-confirmar-exclusao {
+  min-height: 42px;
+
+  padding: 10px 16px;
+
+  border: 0;
+  border-radius: var(--raio-pequeno);
+
+  background: #dc2626;
+  color: #ffffff;
+
+  font: inherit;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.2s ease,
+    background 0.2s ease;
+}
+
+.produto-confirmar-exclusao:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.produto-confirmar-exclusao:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.65;
+}
+
+/*    NOTEBOOK / TABLET
+*/
+
+@media (max-width: 1100px) {
+  .produtos-mobile-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .produtos-filtros {
+    grid-template-columns:
+      1fr
+      1fr;
+  }
+
+  .produtos-filtros input {
+    grid-column: 1 / -1;
+  }
+}
+
+/*    MOBILE
+*/
+
 @media (max-width: 700px) {
+  .produtos-page {
+    gap: 16px;
+  }
+
   .produtos-header {
     align-items: stretch;
     flex-direction: column;
+
+    gap: 14px;
+  }
+
+  .produtos-header h1 {
+    font-size: 26px;
   }
 
   .produtos-header .button-primary {
@@ -120,6 +480,57 @@
   }
 
   .produtos-filtros {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+  .produtos-mobile-list {
     grid-template-columns: 1fr;
+
+    gap: 12px;
+  }
+
+  .produto-mobile-card:hover {
+    transform: none;
+
+    box-shadow: none;
+  }
+
+  .produto-confirmacao-acoes,
+  .produto-exclusao-acoes {
+    flex-direction: column-reverse;
+  }
+
+  .produto-confirmacao-acoes button,
+  .produto-exclusao-acoes button {
+    width: 100%;
+  }
+}
+
+/* MOBILE PEQUENO */
+
+@media (max-width: 420px) {
+  .produto-mobile-card {
+    padding: 12px;
+  }
+
+  .produto-mobile-dados {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .produto-mobile-acoes {
+    grid-template-columns: 1fr;
+  }
+
+  .produto-excluir-button {
+    grid-column: auto;
+  }
+
+  .produto-lista-imagem,
+  .produto-lista-sem-imagem {
+    width: 54px;
+    height: 54px;
   }
 }

@@ -6,6 +6,13 @@ import { useProdutos } from "../../hooks/useProdutos";
 import Modal from "../../components/Modal/Modal";
 import ProdutoForm from "../../components/ProdutoForm/ProdutoForm";
 
+import { obterUrlImagemProduto } from "../../services/produtoImagens";
+
+import {
+  alterarStatusProduto,
+  excluirProdutoDefinitivamente,
+} from "../../services/produtos";
+
 import "./Produtos.css";
 
 function Produtos() {
@@ -16,9 +23,26 @@ function Produtos() {
   );
 
   const [busca, setBusca] = useState("");
+
   const [categoriaFiltro, setCategoriaFiltro] = useState("");
 
+  const [statusFiltro, setStatusFiltro] = useState("ativos");
+
   const [modalProdutoAberto, setModalProdutoAberto] = useState(false);
+
+  const [produtoEditando, setProdutoEditando] = useState(null);
+
+  const [produtoAlterandoStatus, setProdutoAlterandoStatus] = useState(null);
+
+  const [alterandoStatus, setAlterandoStatus] = useState(false);
+
+  const [erroStatus, setErroStatus] = useState("");
+
+  const [produtoExcluindo, setProdutoExcluindo] = useState(null);
+
+  const [excluindo, setExcluindo] = useState(false);
+
+  const [erroExclusao, setErroExclusao] = useState("");
 
   const produtosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -33,14 +57,106 @@ function Produtos() {
       const correspondeCategoria =
         !categoriaFiltro || produto.categorias?.id === categoriaFiltro;
 
-      return correspondeBusca && correspondeCategoria;
+      const correspondeStatus =
+        statusFiltro === "todos" ||
+        (statusFiltro === "ativos" && produto.ativo) ||
+        (statusFiltro === "inativos" && !produto.ativo);
+
+      return correspondeBusca && correspondeCategoria && correspondeStatus;
     });
-  }, [produtos, busca, categoriaFiltro]);
+  }, [produtos, busca, categoriaFiltro, statusFiltro]);
 
   async function produtoCriado() {
     await carregarDados();
 
     setModalProdutoAberto(false);
+  }
+
+  async function produtoAtualizado() {
+    await carregarDados();
+
+    setProdutoEditando(null);
+  }
+
+  async function confirmarAlteracaoStatus() {
+    if (!produtoAlterandoStatus || !empresa?.id || alterandoStatus) {
+      return;
+    }
+
+    setErroStatus("");
+    setAlterandoStatus(true);
+
+    try {
+      await alterarStatusProduto({
+        produtoId: produtoAlterandoStatus.id,
+
+        empresaId: empresa.id,
+
+        ativo: !produtoAlterandoStatus.ativo,
+      });
+
+      await carregarDados();
+
+      setProdutoAlterandoStatus(null);
+    } catch (error) {
+      console.error("Erro ao alterar status do produto:", error);
+
+      setErroStatus(
+        error.message || "Não foi possível alterar o status do produto.",
+      );
+    } finally {
+      setAlterandoStatus(false);
+    }
+  }
+
+  async function confirmarExclusao() {
+    if (!produtoExcluindo || !empresa?.id || excluindo) {
+      return;
+    }
+
+    setErroExclusao("");
+    setExcluindo(true);
+
+    try {
+      await excluirProdutoDefinitivamente({
+        produtoId: produtoExcluindo.id,
+
+        empresaId: empresa.id,
+      });
+
+      await carregarDados();
+
+      setProdutoExcluindo(null);
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+
+      setErroExclusao(error.message || "Não foi possível excluir o produto.");
+    } finally {
+      setExcluindo(false);
+    }
+  }
+
+  function formatarPreco(valor) {
+    return Number(valor).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
+  function abrirEdicao(produto) {
+    setProdutoEditando(produto);
+  }
+
+  function abrirAlteracaoStatus(produto) {
+    setErroStatus("");
+
+    setProdutoAlterandoStatus(produto);
+  }
+
+  function abrirExclusao(produto) {
+    setErroExclusao("");
+
+    setProdutoExcluindo(produto);
   }
 
   return (
@@ -62,14 +178,9 @@ function Produtos() {
       </div>
 
       <div className="produtos-filtros">
-        <input
-          type="search"
-          placeholder="Buscar por nome, SKU ou código..."
-          value={busca}
-          onChange={(event) => setBusca(event.target.value)}
-        />
-
         <select
+          id="categoriaProdutos"
+          name="categoriaProdutos"
           value={categoriaFiltro}
           onChange={(event) => setCategoriaFiltro(event.target.value)}
         >
@@ -81,6 +192,28 @@ function Produtos() {
             </option>
           ))}
         </select>
+
+        <select
+          id="statusProdutos"
+          name="statusProdutos"
+          value={statusFiltro}
+          onChange={(event) => setStatusFiltro(event.target.value)}
+        >
+          <option value="todos">Todos os produtos</option>
+
+          <option value="ativos">Produtos ativos</option>
+
+          <option value="inativos">Produtos inativos</option>
+        </select>
+
+        <input
+          id="buscaProdutos"
+          name="buscaProdutos"
+          type="search"
+          placeholder="Buscar por nome, SKU ou código..."
+          value={busca}
+          onChange={(event) => setBusca(event.target.value)}
+        />
       </div>
 
       {loading && <div className="produtos-status">Carregando produtos...</div>}
@@ -93,51 +226,106 @@ function Produtos() {
         <div className="produtos-vazio">
           <h2>Nenhum produto encontrado</h2>
 
-          <p>Cadastre o primeiro produto da loja.</p>
+          <p>Nenhum produto corresponde aos filtros selecionados.</p>
         </div>
       )}
 
       {!loading && !erro && produtosFiltrados.length > 0 && (
-        <div className="produtos-table-wrapper">
-          <table className="produtos-table">
-            <thead>
-              <tr>
-                <th>Produto</th>
-                <th>Categoria</th>
-                <th>Unidade</th>
-                <th>Estoque</th>
-                <th>Preço</th>
-                <th>Vitrine</th>
-              </tr>
-            </thead>
+        <div className="produtos-mobile-list">
+          {produtosFiltrados.map((produto) => (
+            <article key={produto.id} className="produto-mobile-card">
+              <div className="produto-mobile-topo">
+                {produto.imagem_path ? (
+                  <img
+                    className="produto-lista-imagem"
+                    src={obterUrlImagemProduto(produto.imagem_path)}
+                    alt={produto.nome}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="produto-lista-sem-imagem">📦</div>
+                )}
 
-            <tbody>
-              {produtosFiltrados.map((produto) => (
-                <tr key={produto.id}>
-                  <td>
-                    <strong>{produto.nome}</strong>
+                <div className="produto-lista-info">
+                  <strong>{produto.nome}</strong>
 
-                    {produto.sku && <small>SKU: {produto.sku}</small>}
-                  </td>
+                  {produto.sku && <small>SKU: {produto.sku}</small>}
+                </div>
+              </div>
 
-                  <td>{produto.categorias?.nome ?? "Sem categoria"}</td>
+              <div className="produto-mobile-dados">
+                <div className="produto-mobile-dado">
+                  <span>Categoria</span>
 
-                  <td>{produto.unidade}</td>
+                  <strong>{produto.categorias?.nome ?? "Sem categoria"}</strong>
+                </div>
 
-                  <td>{produto.estoque_atual}</td>
+                <div className="produto-mobile-dado">
+                  <span>Unidade</span>
 
-                  <td>
-                    {Number(produto.preco_venda).toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </td>
+                  <strong>{produto.unidade}</strong>
+                </div>
 
-                  <td>{produto.exibir_na_vitrine ? "Sim" : "Não"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                <div className="produto-mobile-dado">
+                  <span>Estoque</span>
+
+                  <strong>{produto.estoque_atual}</strong>
+                </div>
+
+                <div className="produto-mobile-dado">
+                  <span>Preço</span>
+
+                  <strong>{formatarPreco(produto.preco_venda)}</strong>
+                </div>
+
+                <div className="produto-mobile-dado">
+                  <span>Vitrine</span>
+
+                  <strong>{produto.exibir_na_vitrine ? "Sim" : "Não"}</strong>
+                </div>
+
+                <div className="produto-mobile-dado">
+                  <span>Status</span>
+
+                  <span
+                    className={
+                      produto.ativo
+                        ? "produto-status produto-status-ativo"
+                        : "produto-status produto-status-inativo"
+                    }
+                  >
+                    {produto.ativo ? "Ativo" : "Inativo"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="produto-mobile-acoes">
+                <button
+                  type="button"
+                  className="produto-editar-button"
+                  onClick={() => abrirEdicao(produto)}
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  className="produto-status-button"
+                  onClick={() => abrirAlteracaoStatus(produto)}
+                >
+                  {produto.ativo ? "Desativar" : "Reativar"}
+                </button>
+
+                <button
+                  type="button"
+                  className="produto-excluir-button"
+                  onClick={() => abrirExclusao(produto)}
+                >
+                  Excluir
+                </button>
+              </div>
+            </article>
+          ))}
         </div>
       )}
 
@@ -150,8 +338,141 @@ function Produtos() {
           empresaId={empresa?.id}
           categorias={categorias}
           onSucesso={produtoCriado}
+          onCategoriaCriada={carregarDados}
           onCancelar={() => setModalProdutoAberto(false)}
         />
+      </Modal>
+
+      <Modal
+        aberto={Boolean(produtoEditando)}
+        titulo="Editar produto"
+        onFechar={() => setProdutoEditando(null)}
+      >
+        {produtoEditando && (
+          <ProdutoForm
+            empresaId={empresa?.id}
+            categorias={categorias}
+            produto={produtoEditando}
+            onSucesso={produtoAtualizado}
+            onCategoriaCriada={carregarDados}
+            onCancelar={() => setProdutoEditando(null)}
+          />
+        )}
+      </Modal>
+
+      <Modal
+        aberto={Boolean(produtoAlterandoStatus)}
+        titulo={
+          produtoAlterandoStatus?.ativo
+            ? "Desativar produto"
+            : "Reativar produto"
+        }
+        onFechar={() => {
+          if (!alterandoStatus) {
+            setProdutoAlterandoStatus(null);
+
+            setErroStatus("");
+          }
+        }}
+      >
+        {produtoAlterandoStatus && (
+          <div className="produto-confirmacao">
+            <p>
+              {produtoAlterandoStatus.ativo
+                ? "Deseja desativar"
+                : "Deseja reativar"}{" "}
+              <strong>{produtoAlterandoStatus.nome}</strong>?
+            </p>
+
+            <p className="produto-confirmacao-aviso">
+              {produtoAlterandoStatus.ativo
+                ? "O produto deixará de aparecer nas operações normais e poderá ser reativado depois."
+                : "O produto voltará a aparecer nas operações normais da loja."}
+            </p>
+
+            {erroStatus && <div className="form-error">{erroStatus}</div>}
+
+            <div className="produto-confirmacao-acoes">
+              <button
+                type="button"
+                className="button-secondary"
+                disabled={alterandoStatus}
+                onClick={() => {
+                  setProdutoAlterandoStatus(null);
+
+                  setErroStatus("");
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="button-primary"
+                disabled={alterandoStatus}
+                onClick={confirmarAlteracaoStatus}
+              >
+                {alterandoStatus
+                  ? "Salvando..."
+                  : produtoAlterandoStatus.ativo
+                    ? "Desativar produto"
+                    : "Reativar produto"}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        aberto={Boolean(produtoExcluindo)}
+        titulo="Excluir produto definitivamente"
+        onFechar={() => {
+          if (!excluindo) {
+            setProdutoExcluindo(null);
+
+            setErroExclusao("");
+          }
+        }}
+      >
+        {produtoExcluindo && (
+          <div className="produto-exclusao">
+            <p>
+              Tem certeza que deseja excluir{" "}
+              <strong>{produtoExcluindo.nome}</strong>?
+            </p>
+
+            <p className="produto-exclusao-aviso">
+              Esta ação é permanente. Se o produto já possuir vendas, o sistema
+              bloqueará a exclusão e você deverá apenas desativá-lo.
+            </p>
+
+            {erroExclusao && <div className="form-error">{erroExclusao}</div>}
+
+            <div className="produto-exclusao-acoes">
+              <button
+                type="button"
+                className="button-secondary"
+                disabled={excluindo}
+                onClick={() => {
+                  setProdutoExcluindo(null);
+
+                  setErroExclusao("");
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="produto-confirmar-exclusao"
+                disabled={excluindo}
+                onClick={confirmarExclusao}
+              >
+                {excluindo ? "Excluindo..." : "Excluir definitivamente"}
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </section>
   );

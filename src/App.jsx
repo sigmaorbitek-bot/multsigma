@@ -3,8 +3,10 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Produtos from "./pages/Produtos/Produtos";
+import Estoque from "./pages/Estoque/Estoque";
 
 import DashboardLayout from "./layouts/DashboardLayout";
+
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -26,6 +28,7 @@ function App() {
           <Route index element={<Dashboard />} />
 
           <Route path="produtos" element={<Produtos />} />
+          <Route path="estoque" element={<Estoque />} />
         </Route>
       </Routes>
     </BrowserRouter>
