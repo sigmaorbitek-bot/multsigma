@@ -2,11 +2,81 @@ import { NavLink } from "react-router-dom";
 
 import "./Sidebar.css";
 
+const logo = "/Multsigma.png";
+
+const itensDisponiveis = [
+  {
+    to: "/painel",
+    icone: "📊",
+    nome: "Visão geral",
+    end: true,
+  },
+  {
+    to: "/painel/produtos",
+    icone: "🛍️",
+    nome: "Produtos",
+  },
+  {
+    to: "/painel/estoque",
+    icone: "📦",
+    nome: "Estoque",
+  },
+];
+
+const itensEmBreve = [
+  {
+    icone: "🛒",
+    nome: "Vendas",
+  },
+  {
+    icone: "🧾",
+    nome: "Pedidos",
+  },
+  {
+    icone: "👨🏻‍💼",
+    nome: "Funcionários",
+  },
+  {
+    icone: "🔔",
+    nome: "Notificações",
+  },
+  {
+    icone: "👥",
+    nome: "Clientes",
+  },
+  {
+    icone: "🕐",
+    nome: "Horários",
+  },
+  {
+    icone: "💰",
+    nome: "Financeiro",
+  },
+  {
+    icone: "📄",
+    nome: "Relatórios",
+  },
+  {
+    icone: "⚙️",
+    nome: "Configurações",
+  },
+];
+
 function Sidebar({ aberto, onFechar }) {
   return (
     <aside className={`sidebar ${aberto ? "sidebar-aberta" : ""}`}>
       <div className="sidebar-topo">
-        <h2 className="sidebar-title">Lojas Sigmas</h2>
+        <div className="sidebar-marca">
+          <div className="sidebar-logo">
+            <img
+              src={logo}
+              alt="Logo da Multsigma"
+              className="sidebar-logo-imagem"
+            />
+          </div>
+
+          <h2 className="sidebar-title">Multsigma</h2>
+        </div>
 
         <button
           className="sidebar-fechar"
@@ -18,34 +88,42 @@ function Sidebar({ aberto, onFechar }) {
         </button>
       </div>
 
-      <nav className="sidebar-nav">
-        <NavLink to="/painel" end onClick={onFechar}>
-          Visão geral
-        </NavLink>
+      <nav className="sidebar-nav" aria-label="Navegação principal">
+        {itensDisponiveis.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            onClick={onFechar}
+            className="sidebar-item"
+          >
+            <span className="sidebar-item-icone" aria-hidden="true">
+              {item.icone}
+            </span>
 
-        <NavLink to="/painel/produtos" onClick={onFechar}>
-          Produtos
-        </NavLink>
+            <span className="sidebar-item-nome">{item.nome}</span>
+          </NavLink>
+        ))}
 
-        <NavLink to="/painel/estoque" onClick={onFechar}>
-          Estoque
-        </NavLink>
+        <div className="sidebar-divisor" aria-hidden="true" />
 
-        <NavLink to="/painel/vendas" onClick={onFechar}>
-          Vendas
-        </NavLink>
+        {itensEmBreve.map((item) => (
+          <button
+            key={item.nome}
+            className="sidebar-item sidebar-item-em-breve"
+            type="button"
+            disabled
+            aria-label={`${item.nome} - Em breve`}
+          >
+            <span className="sidebar-item-icone" aria-hidden="true">
+              {item.icone}
+            </span>
 
-        <NavLink to="/painel/clientes" onClick={onFechar}>
-          Clientes
-        </NavLink>
+            <span className="sidebar-item-nome">{item.nome}</span>
 
-        <NavLink to="/painel/financeiro" onClick={onFechar}>
-          Financeiro
-        </NavLink>
-
-        <NavLink to="/painel/relatorios" onClick={onFechar}>
-          Relatórios
-        </NavLink>
+            <span className="sidebar-badge-em-breve">Em breve</span>
+          </button>
+        ))}
       </nav>
     </aside>
   );

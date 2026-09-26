@@ -1,6 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
+import CadastroEmpresa from "./pages/CadastroEmpresa/CadastroEmpresa";
+import RedefinirSenha from "./pages/RedefinirSenha/RedefinirSenha";
+
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Produtos from "./pages/Produtos/Produtos";
 import Estoque from "./pages/Estoque/Estoque";
@@ -13,9 +17,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Home />} />
 
         <Route path="/login" element={<Login />} />
+
+        <Route path="/cadastro" element={<CadastroEmpresa />} />
+
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
         <Route
           path="/painel"
@@ -28,8 +36,11 @@ function App() {
           <Route index element={<Dashboard />} />
 
           <Route path="produtos" element={<Produtos />} />
+
           <Route path="estoque" element={<Estoque />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

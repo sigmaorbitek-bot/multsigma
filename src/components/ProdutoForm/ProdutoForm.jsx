@@ -30,9 +30,9 @@ const FORM_INICIAL = {
   estoqueInicial: "0",
   estoqueMinimo: "0",
 
-  exibirNaVitrine: true,
-  exibirPreco: true,
-  permitirPedido: true,
+  exibirNaVitrine: false,
+  exibirPreco: false,
+  permitirPedido: false,
 };
 
 const INFORMACOES_UNIDADE = {
@@ -129,11 +129,11 @@ function ProdutoForm({
 
       estoqueMinimo: produto.estoque_minimo ?? "0",
 
-      exibirNaVitrine: produto.exibir_na_vitrine ?? true,
+      exibirNaVitrine: produto.exibir_na_vitrine ?? false,
 
-      exibirPreco: produto.exibir_preco ?? true,
+      exibirPreco: produto.exibir_preco ?? false,
 
-      permitirPedido: produto.permitir_pedido ?? true,
+      permitirPedido: produto.permitir_pedido ?? false,
     };
   });
 
@@ -523,364 +523,401 @@ function ProdutoForm({
 
   return (
     <>
-      <form className="produto-form" onSubmit={handleSubmit}>
-        {erro && <div className="form-error">{erro}</div>}
-
-        <div className="produto-form-grid">
-          <div className="form-group form-group-full">
-            <label htmlFor="nome">Nome do produto *</label>
-
-            <input
-              id="nome"
-              name="nome"
-              type="text"
-              value={form.nome}
-              onChange={atualizarCampo}
-              maxLength={150}
-              required
-              autoFocus
-            />
+      <form
+        className="produto-form"
+        onSubmit={handleSubmit}
+        aria-busy={salvando}
+      >
+        {erro && (
+          <div className="form-error" role="alert">
+            {erro}
           </div>
+        )}
 
-          <div className="form-group">
-            <label htmlFor="categoriaId">Categoria</label>
+        <fieldset className="produto-form-fieldset" disabled={salvando}>
+          <div className="produto-form-grid">
+            <div className="form-group form-group-full">
+              <label htmlFor="nome">Nome do produto *</label>
 
-            <div className="categoria-field">
-              <select
-                id="categoriaId"
-                name="categoriaId"
-                value={form.categoriaId}
+              <input
+                id="nome"
+                name="nome"
+                type="text"
+                value={form.nome}
                 onChange={atualizarCampo}
-              >
-                <option value="">Sem categoria</option>
+                maxLength={150}
+                required
+                autoFocus
+              />
+            </div>
 
-                {categoriasDisponiveis.map((categoria) => (
-                  <option key={categoria.id} value={categoria.id}>
-                    {categoria.nome}
-                  </option>
-                ))}
+            <div className="form-group">
+              <label htmlFor="categoriaId">Categoria</label>
+
+              <div className="categoria-field">
+                <select
+                  id="categoriaId"
+                  name="categoriaId"
+                  value={form.categoriaId}
+                  onChange={atualizarCampo}
+                >
+                  <option value="">Sem categoria</option>
+
+                  {categoriasDisponiveis.map((categoria) => (
+                    <option key={categoria.id} value={categoria.id}>
+                      {categoria.nome}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  className="categoria-add-button"
+                  onClick={() => setModalCategoriaAberto(true)}
+                >
+                  + Nova
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="unidade">Unidade de medida *</label>
+
+              <select
+                id="unidade"
+                name="unidade"
+                value={form.unidade}
+                onChange={atualizarCampo}
+                required
+              >
+                <option value="UN">Unidade</option>
+
+                <option value="KG">Quilograma</option>
+
+                <option value="G">Grama</option>
+
+                <option value="L">Litro</option>
+
+                <option value="ML">Mililitro</option>
+
+                <option value="CX">Caixa</option>
+
+                <option value="PCT">Pacote</option>
+
+                <option value="M">Metro</option>
               </select>
 
-              <button
-                type="button"
-                className="categoria-add-button"
-                onClick={() => setModalCategoriaAberto(true)}
-              >
-                + Nova
-              </button>
+              <small className="produto-unidade-ajuda">
+                O estoque e as vendas usarão {unidadeInfo.nome}.
+              </small>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="unidade">Unidade de medida *</label>
+            <div className="form-group">
+              <label htmlFor="sku">SKU</label>
 
-            <select
-              id="unidade"
-              name="unidade"
-              value={form.unidade}
-              onChange={atualizarCampo}
-              required
-            >
-              <option value="UN">Unidade</option>
-
-              <option value="KG">Quilograma</option>
-
-              <option value="G">Grama</option>
-
-              <option value="L">Litro</option>
-
-              <option value="ML">Mililitro</option>
-
-              <option value="CX">Caixa</option>
-
-              <option value="PCT">Pacote</option>
-
-              <option value="M">Metro</option>
-            </select>
-
-            <small className="produto-unidade-ajuda">
-              O estoque e as vendas usarão {unidadeInfo.nome}.
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="sku">SKU</label>
-
-            <input
-              id="sku"
-              name="sku"
-              type="text"
-              value={form.sku}
-              onChange={atualizarCampo}
-              maxLength={100}
-              placeholder="Ex.: PERF-MAL-100"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="codigoBarras">Código de barras</label>
-
-            <div className="codigo-barras-field">
               <input
-                id="codigoBarras"
-                name="codigoBarras"
+                id="sku"
+                name="sku"
                 type="text"
-                value={form.codigoBarras}
+                value={form.sku}
                 onChange={atualizarCampo}
-                inputMode="numeric"
-                autoComplete="off"
                 maxLength={100}
-                placeholder="Digite ou leia o código"
+                placeholder="Ex.: PERF-MAL-100"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="codigoBarras">Código de barras</label>
+
+              <div className="codigo-barras-field">
+                <input
+                  id="codigoBarras"
+                  name="codigoBarras"
+                  type="text"
+                  value={form.codigoBarras}
+                  onChange={atualizarCampo}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={100}
+                  placeholder="Digite ou leia o código"
+                />
+
+                <button
+                  type="button"
+                  className="codigo-barras-camera"
+                  onClick={() => setModalLeitorAberto(true)}
+                  aria-label="Ler código de barras com a câmera"
+                  title="Ler com câmera"
+                >
+                  📷
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="precoCusto">Preço de custo *</label>
+
+              <input
+                id="precoCusto"
+                name="precoCusto"
+                type="number"
+                inputMode="decimal"
+                value={form.precoCusto}
+                onChange={atualizarCampo}
+                min="0"
+                step="0.01"
+                required
+                placeholder="0,00"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="percentualLucro">
+                Lucro desejado sobre o custo (%)
+              </label>
+
+              <input
+                id="percentualLucro"
+                name="percentualLucro"
+                type="number"
+                inputMode="decimal"
+                value={form.percentualLucro}
+                onChange={atualizarCampo}
+                min="0"
+                step="0.01"
+                placeholder="Ex.: 40"
               />
 
-              <button
-                type="button"
-                className="codigo-barras-camera"
-                onClick={() => setModalLeitorAberto(true)}
-                aria-label="Ler código de barras com a câmera"
-                title="Ler com câmera"
-              >
-                📷
-              </button>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="precoCusto">Preço de custo *</label>
-
-            <input
-              id="precoCusto"
-              name="precoCusto"
-              type="number"
-              value={form.precoCusto}
-              onChange={atualizarCampo}
-              min="0"
-              step="0.01"
-              required
-              placeholder="0,00"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="percentualLucro">
-              Lucro desejado sobre o custo (%)
-            </label>
-
-            <input
-              id="percentualLucro"
-              name="percentualLucro"
-              type="number"
-              value={form.percentualLucro}
-              onChange={atualizarCampo}
-              min="0"
-              step="0.01"
-              placeholder="Ex.: 40"
-            />
-
-            <small className="produto-lucro-ajuda">
-              Custo de R$ 50 com 40% gera preço sugerido de R$ 70.
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="precoVenda">Preço de venda *</label>
-
-            <input
-              id="precoVenda"
-              name="precoVenda"
-              type="number"
-              value={form.precoVenda}
-              onChange={atualizarCampo}
-              min="0"
-              step="0.01"
-              required
-              placeholder="0,00"
-            />
-
-            {precoSugerido !== null && (
-              <div className="produto-preco-sugestao">
-                <div>
-                  <span>Preço sugerido</span>
-
-                  <strong>
-                    {precoSugerido.toLocaleString("pt-BR", {
-                      style: "currency",
-
-                      currency: "BRL",
-                    })}
-                  </strong>
-                </div>
-
-                {precoVendaManual && (
-                  <button
-                    type="button"
-                    className="produto-usar-sugestao"
-                    onClick={usarPrecoSugerido}
-                  >
-                    Usar sugestão
-                  </button>
-                )}
-              </div>
-            )}
-
-            {lucroReal && (
-              <div className="produto-lucro-real">
-                <div>
-                  <span>Lucro por unidade</span>
-
-                  <strong>
-                    {lucroReal.lucro.toLocaleString("pt-BR", {
-                      style: "currency",
-
-                      currency: "BRL",
-                    })}
-                  </strong>
-                </div>
-
-                {lucroReal.percentual !== null && (
-                  <small>
-                    {lucroReal.percentual.toFixed(2)}% sobre o custo
-                  </small>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="estoqueInicial">
-              {produto
-                ? `Estoque atual em ${unidadeInfo.nome}`
-                : unidadeInfo.estoque}
-            </label>
-
-            <input
-              id="estoqueInicial"
-              name="estoqueInicial"
-              type="number"
-              value={form.estoqueInicial}
-              onChange={atualizarCampo}
-              min="0"
-              step="0.001"
-              disabled={Boolean(produto)}
-              placeholder={unidadeInfo.exemplo}
-            />
-
-            {produto && (
-              <small className="produto-unidade-ajuda">
-                Para alterar o estoque atual, use o módulo Estoque.
+              <small className="produto-lucro-ajuda">
+                Custo de R$ 50 com 40% gera preço sugerido de R$ 70.
               </small>
-            )}
-          </div>
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="estoqueMinimo">{unidadeInfo.minimo}</label>
+            <div className="form-group">
+              <label htmlFor="precoVenda">Preço de venda *</label>
 
-            <input
-              id="estoqueMinimo"
-              name="estoqueMinimo"
-              type="number"
-              value={form.estoqueMinimo}
-              onChange={atualizarCampo}
-              min="0"
-              step="0.001"
-            />
-          </div>
+              <input
+                id="precoVenda"
+                name="precoVenda"
+                type="number"
+                inputMode="decimal"
+                value={form.precoVenda}
+                onChange={atualizarCampo}
+                min="0"
+                step="0.01"
+                required
+                placeholder="0,00"
+              />
 
-          <div className="form-group form-group-full">
-            <label htmlFor="imagem">Imagem do produto</label>
+              {precoSugerido !== null && (
+                <div className="produto-preco-sugestao">
+                  <div>
+                    <span>Preço sugerido</span>
 
-            <div className="produto-imagem-area">
-              {previewImagem ? (
-                <img
-                  className="produto-imagem-preview"
-                  src={previewImagem}
-                  alt="Pré-visualização do produto"
-                />
-              ) : (
-                <div className="produto-imagem-placeholder">Sem imagem</div>
+                    <strong>
+                      {precoSugerido.toLocaleString("pt-BR", {
+                        style: "currency",
+
+                        currency: "BRL",
+                      })}
+                    </strong>
+                  </div>
+
+                  {precoVendaManual && (
+                    <button
+                      type="button"
+                      className="produto-usar-sugestao"
+                      onClick={usarPrecoSugerido}
+                    >
+                      Usar sugestão
+                    </button>
+                  )}
+                </div>
               )}
 
-              <div className="produto-imagem-controles">
-                <input
-                  ref={imagemInputRef}
-                  id="imagem"
-                  name="imagem"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={selecionarImagem}
-                  disabled={salvando}
-                />
+              {lucroReal && (
+                <div className="produto-lucro-real">
+                  <div>
+                    <span>Lucro por unidade</span>
 
-                <small>JPG, PNG ou WEBP. Máximo 5 MB.</small>
+                    <strong>
+                      {lucroReal.lucro.toLocaleString("pt-BR", {
+                        style: "currency",
 
-                {previewImagem && (
-                  <button
-                    type="button"
-                    className="produto-remover-imagem"
-                    onClick={removerImagem}
+                        currency: "BRL",
+                      })}
+                    </strong>
+                  </div>
+
+                  {lucroReal.percentual !== null && (
+                    <small>
+                      {lucroReal.percentual.toFixed(2)}% sobre o custo
+                    </small>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="estoqueInicial">
+                {produto
+                  ? `Estoque atual em ${unidadeInfo.nome}`
+                  : unidadeInfo.estoque}
+              </label>
+
+              <input
+                id="estoqueInicial"
+                name="estoqueInicial"
+                type="number"
+                inputMode="decimal"
+                value={form.estoqueInicial}
+                onChange={atualizarCampo}
+                min="0"
+                step="0.001"
+                disabled={Boolean(produto)}
+                placeholder={unidadeInfo.exemplo}
+              />
+
+              {produto && (
+                <small className="produto-unidade-ajuda">
+                  Para alterar o estoque atual, use o módulo Estoque.
+                </small>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="estoqueMinimo">{unidadeInfo.minimo}</label>
+
+              <input
+                id="estoqueMinimo"
+                name="estoqueMinimo"
+                type="number"
+                inputMode="decimal"
+                value={form.estoqueMinimo}
+                onChange={atualizarCampo}
+                min="0"
+                step="0.001"
+              />
+            </div>
+
+            <div className="form-group form-group-full">
+              <label htmlFor="imagem">Imagem do produto</label>
+
+              <div className="produto-imagem-area">
+                {previewImagem ? (
+                  <img
+                    className="produto-imagem-preview"
+                    src={previewImagem}
+                    alt="Pré-visualização do produto"
+                  />
+                ) : (
+                  <div className="produto-imagem-placeholder">Sem imagem</div>
+                )}
+
+                <div className="produto-imagem-controles">
+                  <input
+                    ref={imagemInputRef}
+                    id="imagem"
+                    name="imagem"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={selecionarImagem}
                     disabled={salvando}
-                  >
-                    Remover imagem
-                  </button>
-                )}
+                  />
 
-                {removerImagemAtual && produto?.imagem_path && (
-                  <small className="produto-imagem-remocao-aviso">
-                    A imagem atual será removida ao salvar.
-                  </small>
-                )}
+                  <small>JPG, PNG ou WEBP. Máximo 5 MB.</small>
+
+                  {previewImagem && (
+                    <button
+                      type="button"
+                      className="produto-remover-imagem"
+                      onClick={removerImagem}
+                      disabled={salvando}
+                    >
+                      Remover imagem
+                    </button>
+                  )}
+
+                  {removerImagemAtual && produto?.imagem_path && (
+                    <small className="produto-imagem-remocao-aviso">
+                      A imagem atual será removida ao salvar.
+                    </small>
+                  )}
+                </div>
               </div>
+            </div>
+
+            <div className="form-group form-group-full">
+              <label htmlFor="descricao">Descrição</label>
+
+              <textarea
+                id="descricao"
+                name="descricao"
+                value={form.descricao}
+                onChange={atualizarCampo}
+                rows={4}
+                maxLength={1000}
+                placeholder="Descreva o produto, características, tamanho, aroma, composição ou outras informações importantes."
+              />
             </div>
           </div>
 
-          <div className="form-group form-group-full">
-            <label htmlFor="descricao">Descrição</label>
+          <div className="produto-publicacao">
+            <div className="produto-publicacao-header">
+              <div>
+                <strong>Vitrine e pedidos</strong>
 
-            <textarea
-              id="descricao"
-              name="descricao"
-              value={form.descricao}
-              onChange={atualizarCampo}
-              rows={4}
-              maxLength={1000}
-            />
+                <p>
+                  Essas opções serão liberadas quando a área pública de clientes
+                  estiver disponível.
+                </p>
+              </div>
+
+              <span className="produto-publicacao-badge">Em breve</span>
+            </div>
+
+            <div className="produto-form-opcoes produto-form-opcoes-bloqueadas">
+              <label>
+                <input
+                  id="exibirNaVitrine"
+                  name="exibirNaVitrine"
+                  type="checkbox"
+                  checked={form.exibirNaVitrine}
+                  onChange={atualizarCampo}
+                  disabled
+                />
+
+                <span>Mostrar na vitrine</span>
+              </label>
+
+              <label>
+                <input
+                  id="exibirPreco"
+                  name="exibirPreco"
+                  type="checkbox"
+                  checked={form.exibirPreco}
+                  onChange={atualizarCampo}
+                  disabled
+                />
+
+                <span>Mostrar preço</span>
+              </label>
+
+              <label>
+                <input
+                  id="permitirPedido"
+                  name="permitirPedido"
+                  type="checkbox"
+                  checked={form.permitirPedido}
+                  onChange={atualizarCampo}
+                  disabled
+                />
+
+                <span>Permitir pedido</span>
+              </label>
+            </div>
           </div>
-        </div>
-
-        <div className="produto-form-opcoes">
-          <label>
-            <input
-              id="exibirNaVitrine"
-              name="exibirNaVitrine"
-              type="checkbox"
-              checked={form.exibirNaVitrine}
-              onChange={atualizarCampo}
-            />
-            Mostrar na vitrine
-          </label>
-
-          <label>
-            <input
-              id="exibirPreco"
-              name="exibirPreco"
-              type="checkbox"
-              checked={form.exibirPreco}
-              onChange={atualizarCampo}
-            />
-            Mostrar preço
-          </label>
-
-          <label>
-            <input
-              id="permitirPedido"
-              name="permitirPedido"
-              type="checkbox"
-              checked={form.permitirPedido}
-              onChange={atualizarCampo}
-            />
-            Permitir pedido
-          </label>
-        </div>
+        </fieldset>
 
         <div className="produto-form-actions">
           <button

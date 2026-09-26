@@ -1,35 +1,107 @@
 .stat-card {
+  width: 100%;
   min-width: 0;
+  min-height: 142px;
+  height: 100%;
 
   display: flex;
-  flex-direction: column;
-  gap: 10px;
 
   padding: 20px;
 
-  background: var(--cor-superficie);
-
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  box-shadow: var(--sombra-suave);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+
+  border-color: color-mix(in srgb, var(--cor-primaria) 20%, var(--cor-borda));
+
+  box-shadow: var(--sombra-card);
+}
+
+.stat-card-conteudo {
+  min-width: 0;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  gap: 8px;
 }
 
 .stat-card-titulo {
-  font-size: 14px;
   color: var(--cor-texto-secundario);
+
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .stat-card-valor {
-  font-size: 28px;
+  margin-top: 2px;
+
   color: var(--cor-texto);
+
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+
+  overflow-wrap: anywhere;
 }
 
 .stat-card-descricao {
-  font-size: 13px;
+  margin-top: auto;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Cards marcados como em breve no Dashboard */
+
+.dashboard-card-em-breve .stat-card {
+  background: color-mix(
+    in srgb,
+    var(--cor-superficie-secundaria) 65%,
+    var(--cor-superficie)
+  );
+
+  box-shadow: none;
+}
+
+.dashboard-card-em-breve .stat-card:hover {
+  transform: none;
+
+  border-color: var(--cor-borda);
+
+  box-shadow: none;
+}
+
+.dashboard-card-em-breve .stat-card-titulo {
+  padding-right: 72px;
+}
+
+.dashboard-card-em-breve .stat-card-valor {
   color: var(--cor-texto-secundario);
 }
 
+/* Mobile */
+
 @media (max-width: 600px) {
   .stat-card {
+    min-height: 126px;
+
     padding: 16px;
   }
 

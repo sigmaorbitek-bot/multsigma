@@ -1,133 +1,455 @@
 .header {
-  height: 72px;
+  position: relative;
+
+  min-height: 72px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  background: var(--cor-superficie);
+
+  gap: 20px;
+
+  padding: 10px 24px;
+
   border-bottom: 1px solid var(--cor-borda);
+
+  background: var(--cor-superficie);
+
+  box-shadow: 0 1px 0 rgba(7, 24, 47, 0.02);
+}
+
+/* Lado esquerdo */
+
+.header-esquerda {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
 }
 
 .header-empresa {
+  min-width: 0;
+
   display: flex;
   align-items: center;
-  gap: 12px;
+
+  gap: 11px;
+}
+
+.header-logo-area {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie-secundaria);
 }
 
 .header-logo {
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
 
-  object-fit: cover;
-  border-radius: var(--raio-medio);
+  display: block;
+
+  padding: 3px;
+
+  object-fit: contain;
+}
+
+.header-logo-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--gradiente-multsigma);
+  color: var(--cor-texto-claro);
+
+  font-size: 13px;
+  font-weight: 800;
+
+  letter-spacing: 0.03em;
+}
+
+.header-empresa-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.header-empresa-label {
+  color: var(--cor-texto-secundario);
+
+  font-size: 9px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.05em;
 }
 
 .header-empresa-nome {
-  font-size: 18px;
-  font-weight: 700;
+  max-width: 300px;
+
+  overflow: hidden;
+
   color: var(--cor-texto);
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* Ações */
+
 .header-actions {
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
-  gap: 16px;
+
+  gap: 12px;
+}
+
+/* Notificações */
+
+.header-notificacao-area {
+  position: relative;
+
+  flex-shrink: 0;
 }
 
 .header-notificacao {
   width: 40px;
   height: 40px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
+
+  padding: 0;
+
+  border: 1px solid var(--cor-borda);
   border-radius: var(--raio-medio);
-  background: transparent;
-  font-size: 20px;
-  cursor: pointer;
+
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto-secundario);
+
+  font-size: 18px;
+
+  cursor: default;
+
+  opacity: 0.7;
 }
 
-.header-notificacao:hover {
-  background: var(--cor-fundo);
+.header-notificacao:disabled {
+  cursor: default;
+}
+
+.header-notificacao-badge {
+  position: absolute;
+
+  top: -7px;
+  right: -9px;
+
+  padding: 3px 5px;
+
+  border: 1px solid
+    color-mix(in srgb, var(--cor-marca-clara) 25%, var(--cor-borda));
+
+  border-radius: 999px;
+
+  background: var(--cor-superficie);
+  color: var(--cor-marca-media);
+
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  box-shadow: var(--sombra-suave);
+}
+
+/* Usuário */
+
+.header-usuario-area {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  gap: 2px;
+}
+
+.header-usuario-label {
+  color: var(--cor-texto-secundario);
+
+  font-size: 9px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.05em;
 }
 
 .header-usuario {
-  font-size: 14px;
-  font-weight: 600;
+  max-width: 180px;
+
+  overflow: hidden;
+
   color: var(--cor-texto);
+
+  font-size: 13px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+/* Sair */
 
 .header-sair {
-  padding: 9px 14px;
+  min-height: 38px;
+
+  padding: 8px 13px;
+
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-pequeno);
+
   background: var(--cor-superficie);
   color: var(--cor-texto);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
   cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.header-sair:hover {
-  background: var(--cor-fundo);
+.header-sair:hover:not(:disabled) {
+  border-color: var(--cor-borda-forte);
+
+  background: var(--cor-superficie-secundaria);
 }
+
+.header-sair:focus-visible,
+.header-menu:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.header-sair:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.6;
+}
+
+/* Menu mobile */
 
 .header-menu {
   display: none;
+
   width: 40px;
   height: 40px;
-  border: none;
+
+  flex-shrink: 0;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid var(--cor-borda);
   border-radius: var(--raio-medio);
-  background: transparent;
-  font-size: 22px;
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+
+  font: inherit;
+  font-size: 20px;
+
   cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
+
+.header-menu:hover {
+  border-color: var(--cor-borda-forte);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+/* Erro */
+
+.header-erro {
+  position: absolute;
+
+  top: calc(100% + 8px);
+  right: 24px;
+
+  z-index: 50;
+
+  max-width: 320px;
+
+  padding: 10px 12px;
+
+  border: 1px solid color-mix(in srgb, var(--cor-perigo) 25%, var(--cor-borda));
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo);
+
+  font-size: 12px;
+
+  box-shadow: var(--sombra-card);
+}
+
+/* Tablet e mobile */
 
 @media (max-width: 768px) {
   .header {
-    height: 64px;
+    min-height: 64px;
 
-    padding: 0 12px;
     gap: 10px;
+
+    padding: 8px 12px;
   }
 
   .header-menu {
     display: flex;
-    align-items: center;
-    justify-content: center;
+  }
+
+  .header-esquerda {
+    min-width: 0;
+
+    flex: 1;
   }
 
   .header-empresa {
     min-width: 0;
-    gap: 8px;
+
+    flex: 1;
   }
 
-  .header-logo {
-    width: 32px;
-    height: 32px;
+  .header-logo-area {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-empresa-info {
+    min-width: 0;
+  }
+
+  .header-empresa-label {
+    display: none;
   }
 
   .header-empresa-nome {
-    max-width: 110px;
+    max-width: 180px;
 
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
     font-size: 14px;
   }
 
   .header-actions {
-    gap: 6px;
+    gap: 7px;
   }
 
-  .header-usuario {
+  .header-usuario-area {
     display: none;
   }
 
   .header-notificacao {
     width: 36px;
     height: 36px;
+
+    font-size: 16px;
+  }
+
+  .header-notificacao-badge {
+    display: none;
   }
 
   .header-sair {
+    min-height: 36px;
+
+    padding: 7px 10px;
+  }
+
+  .header-erro {
+    right: 12px;
+  }
+}
+
+/* Mobile pequeno */
+
+@media (max-width: 480px) {
+  .header {
     padding: 8px 10px;
+  }
+
+  .header-menu {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-logo-area {
+    width: 34px;
+    height: 34px;
+  }
+
+  .header-empresa-nome {
+    max-width: 115px;
+
+    font-size: 13px;
+  }
+
+  .header-notificacao {
+    display: none;
+  }
+
+  .header-sair {
+    padding: 7px 9px;
+
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .header-logo-area {
+    display: none;
+  }
+
+  .header-empresa-nome {
+    max-width: 105px;
   }
 }

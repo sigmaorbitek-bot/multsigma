@@ -23,9 +23,7 @@ function Produtos() {
   );
 
   const [busca, setBusca] = useState("");
-
   const [categoriaFiltro, setCategoriaFiltro] = useState("");
-
   const [statusFiltro, setStatusFiltro] = useState("ativos");
 
   const [modalProdutoAberto, setModalProdutoAberto] = useState(false);
@@ -48,11 +46,17 @@ function Produtos() {
     const termo = busca.trim().toLowerCase();
 
     return produtos.filter((produto) => {
+      const nome = produto.nome?.toLowerCase() ?? "";
+
+      const sku = produto.sku?.toLowerCase() ?? "";
+
+      const codigoBarras = produto.codigo_barras?.toLowerCase() ?? "";
+
       const correspondeBusca =
         !termo ||
-        produto.nome?.toLowerCase().includes(termo) ||
-        produto.sku?.toLowerCase().includes(termo) ||
-        produto.codigo_barras?.toLowerCase().includes(termo);
+        nome.includes(termo) ||
+        sku.includes(termo) ||
+        codigoBarras.includes(termo);
 
       const correspondeCategoria =
         !categoriaFiltro || produto.categorias?.id === categoriaFiltro;
@@ -137,10 +141,24 @@ function Produtos() {
   }
 
   function formatarPreco(valor) {
-    return Number(valor).toLocaleString("pt-BR", {
+    const numero = Number(valor);
+
+    if (!Number.isFinite(numero)) {
+      return "R$ 0,00";
+    }
+
+    return numero.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
+  }
+
+  function formatarEstoque(produto) {
+    const quantidade = produto.estoque_atual ?? 0;
+
+    const unidade = produto.unidade ?? "";
+
+    return `${quantidade}${unidade ? ` ${unidade}` : ""}`;
   }
 
   function abrirEdicao(produto) {
@@ -159,13 +177,15 @@ function Produtos() {
     setProdutoExcluindo(produto);
   }
 
+  const nenhumProdutoCadastrado = produtos.length === 0;
+
   return (
     <section className="produtos-page">
       <div className="produtos-header">
         <div>
           <h1>Produtos</h1>
 
-          <p>Gerencie catálogo, preços e estoque.</p>
+          <p>Gerencie catálogo, preços, estoque e disponibilidade.</p>
         </div>
 
         <button
@@ -178,9 +198,20 @@ function Produtos() {
       </div>
 
       <div className="produtos-filtros">
+        <input
+          id="buscaProdutos"
+          name="buscaProdutos"
+          type="search"
+          aria-label="Buscar produtos"
+          placeholder="Buscar por nome, SKU ou código..."
+          value={busca}
+          onChange={(event) => setBusca(event.target.value)}
+        />
+
         <select
           id="categoriaProdutos"
           name="categoriaProdutos"
+          aria-label="Filtrar por categoria"
           value={categoriaFiltro}
           onChange={(event) => setCategoriaFiltro(event.target.value)}
         >
@@ -196,6 +227,7 @@ function Produtos() {
         <select
           id="statusProdutos"
           name="statusProdutos"
+          aria-label="Filtrar por status"
           value={statusFiltro}
           onChange={(event) => setStatusFiltro(event.target.value)}
         >
@@ -205,28 +237,47 @@ function Produtos() {
 
           <option value="inativos">Produtos inativos</option>
         </select>
-
-        <input
-          id="buscaProdutos"
-          name="buscaProdutos"
-          type="search"
-          placeholder="Buscar por nome, SKU ou código..."
-          value={busca}
-          onChange={(event) => setBusca(event.target.value)}
-        />
       </div>
 
-      {loading && <div className="produtos-status">Carregando produtos...</div>}
+      {loading && (
+        <div className="produtos-status" role="status" aria-live="polite">
+          Carregando produtos...
+        </div>
+      )}
 
       {!loading && erro && (
-        <div className="produtos-status produtos-status-erro">{erro}</div>
+        <div className="produtos-status produtos-status-erro" role="alert">
+          {erro}
+        </div>
       )}
 
       {!loading && !erro && produtosFiltrados.length === 0 && (
         <div className="produtos-vazio">
-          <h2>Nenhum produto encontrado</h2>
+          <div className="produtos-vazio-icone" aria-hidden="true">
+            📦
+          </div>
 
-          <p>Nenhum produto corresponde aos filtros selecionados.</p>
+          <h2>
+            {nenhumProdutoCadastrado
+              ? "Nenhum produto cadastrado"
+              : "Nenhum produto encontrado"}
+          </h2>
+
+          <p>
+            {nenhumProdutoCadastrado
+              ? "Cadastre seu primeiro produto para começar a controlar catálogo e estoque."
+              : "Nenhum produto corresponde aos filtros selecionados."}
+          </p>
+
+          {nenhumProdutoCadastrado && (
+            <button
+              type="button"
+              className="button-primary produtos-vazio-botao"
+              onClick={() => setModalProdutoAberto(true)}
+            >
+              + Cadastrar produto
+            </button>
+          )}
         </div>
       )}
 
@@ -239,11 +290,13 @@ function Produtos() {
                   <img
                     className="produto-lista-imagem"
                     src={obterUrlImagemProduto(produto.imagem_path)}
-                    alt={produto.nome}
+                    alt={`Imagem de ${produto.nome}`}
                     loading="lazy"
                   />
                 ) : (
-                  <div className="produto-lista-sem-imagem">📦</div>
+                  <div className="produto-lista-sem-imagem" aria-hidden="true">
+                    📦
+                  </div>
                 )}
 
                 <div className="produto-lista-info">
@@ -263,13 +316,13 @@ function Produtos() {
                 <div className="produto-mobile-dado">
                   <span>Unidade</span>
 
-                  <strong>{produto.unidade}</strong>
+                  <strong>{produto.unidade ?? "-"}</strong>
                 </div>
 
                 <div className="produto-mobile-dado">
                   <span>Estoque</span>
 
-                  <strong>{produto.estoque_atual}</strong>
+                  <strong>{formatarEstoque(produto)}</strong>
                 </div>
 
                 <div className="produto-mobile-dado">
@@ -281,7 +334,15 @@ function Produtos() {
                 <div className="produto-mobile-dado">
                   <span>Vitrine</span>
 
-                  <strong>{produto.exibir_na_vitrine ? "Sim" : "Não"}</strong>
+                  <span
+                    className={
+                      produto.exibir_na_vitrine
+                        ? "produto-vitrine produto-vitrine-sim"
+                        : "produto-vitrine produto-vitrine-nao"
+                    }
+                  >
+                    {produto.exibir_na_vitrine ? "Visível" : "Oculto"}
+                  </span>
                 </div>
 
                 <div className="produto-mobile-dado">
@@ -442,8 +503,9 @@ function Produtos() {
             </p>
 
             <p className="produto-exclusao-aviso">
-              Esta ação é permanente. Se o produto já possuir vendas, o sistema
-              bloqueará a exclusão e você deverá apenas desativá-lo.
+              Esta ação é permanente. Se o produto já possuir vendas ou
+              movimentações vinculadas, o sistema bloqueará a exclusão e você
+              deverá apenas desativá-lo.
             </p>
 
             {erroExclusao && <div className="form-error">{erroExclusao}</div>}

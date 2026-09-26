@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { Link } from "react-router-dom";
+
 import { useAuth } from "../../hooks/useAuth";
 
 import Modal from "../../components/Modal/Modal";
@@ -17,7 +19,6 @@ import "./Estoque.css";
 async function buscarDadosEstoque(empresaId) {
   const [produtosDados, movimentacoesDados] = await Promise.all([
     listarProdutosEstoque(empresaId),
-
     listarMovimentacoesEstoque(empresaId),
   ]);
 
@@ -79,7 +80,7 @@ function Estoque() {
 
   useEffect(() => {
     if (!empresa?.id) {
-      return;
+      return undefined;
     }
 
     let cancelado = false;
@@ -121,19 +122,25 @@ function Estoque() {
     const termo = busca.trim().toLowerCase();
 
     return produtos.filter((produto) => {
+      const nome = produto.nome?.toLowerCase() ?? "";
+
+      const sku = produto.sku?.toLowerCase() ?? "";
+
+      const codigoBarras = produto.codigo_barras?.toLowerCase() ?? "";
+
       const correspondeBusca =
         !termo ||
-        produto.nome?.toLowerCase().includes(termo) ||
-        produto.sku?.toLowerCase().includes(termo) ||
-        produto.codigo_barras?.toLowerCase().includes(termo);
+        nome.includes(termo) ||
+        sku.includes(termo) ||
+        codigoBarras.includes(termo);
 
-      const estoqueAtual = Number(produto.estoque_atual);
+      const estoqueAtual = Number(produto.estoque_atual ?? 0);
 
-      const estoqueMinimo = Number(produto.estoque_minimo);
-
-      const estoqueBaixo = estoqueAtual <= estoqueMinimo;
+      const estoqueMinimo = Number(produto.estoque_minimo ?? 0);
 
       const semEstoque = estoqueAtual <= 0;
+
+      const estoqueBaixo = estoqueAtual <= estoqueMinimo;
 
       const correspondeStatus =
         statusFiltro === "todos" ||
@@ -151,9 +158,7 @@ function Estoque() {
     setTipoMovimentacao("entrada");
 
     setQuantidade("");
-
     setMotivo("");
-
     setErroMovimentacao("");
   }
 
@@ -165,9 +170,7 @@ function Estoque() {
     setProdutoMovimentando(null);
 
     setQuantidade("");
-
     setMotivo("");
-
     setErroMovimentacao("");
   }
 
@@ -221,7 +224,7 @@ function Estoque() {
 
         quantidade: quantidadeNumero,
 
-        motivo,
+        motivo: motivo.trim(),
       });
 
       await carregarDados();
@@ -229,7 +232,6 @@ function Estoque() {
       setProdutoMovimentando(null);
 
       setQuantidade("");
-
       setMotivo("");
     } catch (error) {
       console.error("Erro ao movimentar estoque:", error);
@@ -243,14 +245,13 @@ function Estoque() {
   }
 
   function obterSituacao(produto) {
-    const atual = Number(produto.estoque_atual);
+    const atual = Number(produto.estoque_atual ?? 0);
 
-    const minimo = Number(produto.estoque_minimo);
+    const minimo = Number(produto.estoque_minimo ?? 0);
 
     if (atual <= 0) {
       return {
         texto: "Sem estoque",
-
         classe: "estoque-status estoque-status-zerado",
       };
     }
@@ -258,14 +259,12 @@ function Estoque() {
     if (atual <= minimo) {
       return {
         texto: "Estoque baixo",
-
         classe: "estoque-status estoque-status-baixo",
       };
     }
 
     return {
       texto: "Normal",
-
       classe: "estoque-status estoque-status-normal",
     };
   }
@@ -282,9 +281,51 @@ function Estoque() {
     return tipos[tipo] ?? tipo;
   }
 
-  function formatarData(data) {
-    return new Date(data).toLocaleString("pt-BR");
+  function obterClasseTipo(tipo) {
+    const classes = {
+      entrada: "estoque-tipo-entrada",
+
+      saida: "estoque-tipo-saida",
+
+      ajuste: "estoque-tipo-ajuste",
+
+      perda: "estoque-tipo-perda",
+
+      devolucao: "estoque-tipo-devolucao",
+    };
+
+    return classes[tipo] ?? "";
   }
+
+  function formatarData(data) {
+    if (!data) {
+      return "-";
+    }
+
+    const dataConvertida = new Date(data);
+
+    if (Number.isNaN(dataConvertida.getTime())) {
+      return "-";
+    }
+
+    return dataConvertida.toLocaleString("pt-BR");
+  }
+
+  function formatarQuantidade(valor, unidade = "") {
+    const numero = Number(valor);
+
+    if (!Number.isFinite(numero)) {
+      return `0${unidade ? ` ${unidade}` : ""}`;
+    }
+
+    const quantidadeFormatada = numero.toLocaleString("pt-BR", {
+      maximumFractionDigits: 3,
+    });
+
+    return `${quantidadeFormatada}${unidade ? ` ${unidade}` : ""}`;
+  }
+
+  const nenhumProdutoCadastrado = produtos.length === 0;
 
   return (
     <section className="estoque-page">
@@ -292,7 +333,7 @@ function Estoque() {
         <div>
           <h1>Estoque</h1>
 
-          <p>Acompanhe quantidades, entradas, saídas e ajustes.</p>
+          <p>Acompanhe quantidades, entradas, saídas, perdas e ajustes.</p>
         </div>
       </div>
 
@@ -301,6 +342,7 @@ function Estoque() {
           id="buscaEstoque"
           name="buscaEstoque"
           type="search"
+          aria-label="Buscar produtos no estoque"
           placeholder="Buscar por nome, SKU ou código..."
           value={busca}
           onChange={(event) => setBusca(event.target.value)}
@@ -309,10 +351,11 @@ function Estoque() {
         <select
           id="statusEstoque"
           name="statusEstoque"
+          aria-label="Filtrar situação do estoque"
           value={statusFiltro}
           onChange={(event) => setStatusFiltro(event.target.value)}
         >
-          <option value="todos">Todos</option>
+          <option value="todos">Todas as situações</option>
 
           <option value="normal">Estoque normal</option>
 
@@ -323,18 +366,43 @@ function Estoque() {
       </div>
 
       {loading && (
-        <div className="estoque-status-geral">Carregando estoque...</div>
+        <div className="estoque-status-geral" role="status" aria-live="polite">
+          Carregando estoque...
+        </div>
       )}
 
       {!loading && erro && (
-        <div className="estoque-status-geral estoque-status-erro">{erro}</div>
+        <div className="estoque-status-geral estoque-status-erro" role="alert">
+          {erro}
+        </div>
       )}
 
       {!loading && !erro && produtosFiltrados.length === 0 && (
         <div className="estoque-vazio">
-          <h2>Nenhum produto encontrado</h2>
+          <div className="estoque-vazio-icone" aria-hidden="true">
+            📦
+          </div>
 
-          <p>Nenhum produto corresponde aos filtros selecionados.</p>
+          <h2>
+            {nenhumProdutoCadastrado
+              ? "Nenhum produto no estoque"
+              : "Nenhum produto encontrado"}
+          </h2>
+
+          <p>
+            {nenhumProdutoCadastrado
+              ? "Cadastre seu primeiro produto para começar a controlar o estoque."
+              : "Nenhum produto corresponde aos filtros selecionados."}
+          </p>
+
+          {nenhumProdutoCadastrado && (
+            <Link
+              className="button-primary estoque-vazio-botao"
+              to="/painel/produtos"
+            >
+              Ir para Produtos
+            </Link>
+          )}
         </div>
       )}
 
@@ -349,12 +417,17 @@ function Estoque() {
                   {produto.imagem_path ? (
                     <img
                       src={obterUrlImagemProduto(produto.imagem_path)}
-                      alt={produto.nome}
+                      alt={`Imagem de ${produto.nome}`}
                       className="estoque-produto-imagem"
                       loading="lazy"
                     />
                   ) : (
-                    <div className="estoque-produto-sem-imagem">📦</div>
+                    <div
+                      className="estoque-produto-sem-imagem"
+                      aria-hidden="true"
+                    >
+                      📦
+                    </div>
                   )}
 
                   <div className="estoque-produto-info">
@@ -368,19 +441,29 @@ function Estoque() {
                   <div className="estoque-mobile-dado">
                     <span>Unidade</span>
 
-                    <strong>{produto.unidade}</strong>
+                    <strong>{produto.unidade ?? "-"}</strong>
                   </div>
 
                   <div className="estoque-mobile-dado">
                     <span>Estoque atual</span>
 
-                    <strong>{produto.estoque_atual}</strong>
+                    <strong>
+                      {formatarQuantidade(
+                        produto.estoque_atual,
+                        produto.unidade,
+                      )}
+                    </strong>
                   </div>
 
                   <div className="estoque-mobile-dado">
                     <span>Estoque mínimo</span>
 
-                    <strong>{produto.estoque_minimo}</strong>
+                    <strong>
+                      {formatarQuantidade(
+                        produto.estoque_minimo,
+                        produto.unidade,
+                      )}
+                    </strong>
                   </div>
 
                   <div className="estoque-mobile-dado">
@@ -407,9 +490,13 @@ function Estoque() {
 
       <div className="estoque-historico">
         <div className="estoque-historico-header">
-          <h2>Últimas movimentações</h2>
+          <div>
+            <h2>Últimas movimentações</h2>
 
-          <span>
+            <p>Histórico das alterações realizadas no estoque.</p>
+          </div>
+
+          <span className="estoque-historico-contador">
             {movimentacoes.length}{" "}
             {movimentacoes.length === 1 ? "registro" : "registros"}
           </span>
@@ -417,7 +504,13 @@ function Estoque() {
 
         {movimentacoes.length === 0 ? (
           <div className="estoque-historico-vazio">
-            Nenhuma movimentação registrada.
+            <span aria-hidden="true">🧾</span>
+
+            <div>
+              <strong>Nenhuma movimentação registrada</strong>
+
+              <p>As entradas, saídas e ajustes aparecerão aqui.</p>
+            </div>
           </div>
         ) : (
           <>
@@ -442,74 +535,126 @@ function Estoque() {
                 </thead>
 
                 <tbody>
-                  {movimentacoes.map((movimentacao) => (
-                    <tr key={movimentacao.id}>
-                      <td>{movimentacao.produtos?.nome ?? "Produto"}</td>
+                  {movimentacoes.map((movimentacao) => {
+                    const unidade = movimentacao.produtos?.unidade ?? "";
 
-                      <td>{formatarTipo(movimentacao.tipo)}</td>
+                    return (
+                      <tr key={movimentacao.id}>
+                        <td>
+                          <strong className="estoque-historico-produto">
+                            {movimentacao.produtos?.nome ?? "Produto"}
+                          </strong>
+                        </td>
 
-                      <td>{movimentacao.quantidade}</td>
+                        <td>
+                          <span
+                            className={`estoque-tipo ${obterClasseTipo(
+                              movimentacao.tipo,
+                            )}`}
+                          >
+                            {formatarTipo(movimentacao.tipo)}
+                          </span>
+                        </td>
 
-                      <td>{movimentacao.estoque_anterior}</td>
+                        <td>
+                          {formatarQuantidade(movimentacao.quantidade, unidade)}
+                        </td>
 
-                      <td>{movimentacao.estoque_posterior}</td>
+                        <td>
+                          {formatarQuantidade(
+                            movimentacao.estoque_anterior,
+                            unidade,
+                          )}
+                        </td>
 
-                      <td>{movimentacao.motivo || "-"}</td>
+                        <td>
+                          {formatarQuantidade(
+                            movimentacao.estoque_posterior,
+                            unidade,
+                          )}
+                        </td>
 
-                      <td>{formatarData(movimentacao.created_at)}</td>
-                    </tr>
-                  ))}
+                        <td className="estoque-historico-motivo">
+                          {movimentacao.motivo || "-"}
+                        </td>
+
+                        <td>{formatarData(movimentacao.created_at)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
             <div className="estoque-historico-mobile-list">
-              {movimentacoes.map((movimentacao) => (
-                <article
-                  key={movimentacao.id}
-                  className="estoque-historico-mobile-card"
-                >
-                  <div className="estoque-historico-mobile-topo">
-                    <strong>{movimentacao.produtos?.nome ?? "Produto"}</strong>
+              {movimentacoes.map((movimentacao) => {
+                const unidade = movimentacao.produtos?.unidade ?? "";
 
-                    <span className="estoque-tipo">
-                      {formatarTipo(movimentacao.tipo)}
-                    </span>
-                  </div>
+                return (
+                  <article
+                    key={movimentacao.id}
+                    className="estoque-historico-mobile-card"
+                  >
+                    <div className="estoque-historico-mobile-topo">
+                      <strong>
+                        {movimentacao.produtos?.nome ?? "Produto"}
+                      </strong>
 
-                  <div className="estoque-historico-mobile-dados">
-                    <div className="estoque-historico-mobile-dado">
-                      <span>Quantidade</span>
-
-                      <strong>{movimentacao.quantidade}</strong>
+                      <span
+                        className={`estoque-tipo ${obterClasseTipo(
+                          movimentacao.tipo,
+                        )}`}
+                      >
+                        {formatarTipo(movimentacao.tipo)}
+                      </span>
                     </div>
 
-                    <div className="estoque-historico-mobile-dado">
-                      <span>Antes</span>
+                    <div className="estoque-historico-mobile-dados">
+                      <div className="estoque-historico-mobile-dado">
+                        <span>Quantidade</span>
 
-                      <strong>{movimentacao.estoque_anterior}</strong>
+                        <strong>
+                          {formatarQuantidade(movimentacao.quantidade, unidade)}
+                        </strong>
+                      </div>
+
+                      <div className="estoque-historico-mobile-dado">
+                        <span>Antes</span>
+
+                        <strong>
+                          {formatarQuantidade(
+                            movimentacao.estoque_anterior,
+                            unidade,
+                          )}
+                        </strong>
+                      </div>
+
+                      <div className="estoque-historico-mobile-dado">
+                        <span>Depois</span>
+
+                        <strong>
+                          {formatarQuantidade(
+                            movimentacao.estoque_posterior,
+                            unidade,
+                          )}
+                        </strong>
+                      </div>
+
+                      <div className="estoque-historico-mobile-dado">
+                        <span>Data</span>
+
+                        <strong>{formatarData(movimentacao.created_at)}</strong>
+                      </div>
+
+                      <div className="estoque-historico-mobile-dado estoque-historico-mobile-dado-full">
+                        <span>Motivo</span>
+
+                        <strong>{movimentacao.motivo || "-"}</strong>
+                      </div>
                     </div>
-
-                    <div className="estoque-historico-mobile-dado">
-                      <span>Depois</span>
-
-                      <strong>{movimentacao.estoque_posterior}</strong>
-                    </div>
-
-                    <div className="estoque-historico-mobile-dado">
-                      <span>Data</span>
-
-                      <strong>{formatarData(movimentacao.created_at)}</strong>
-                    </div>
-
-                    <div className="estoque-historico-mobile-dado estoque-historico-mobile-dado-full">
-                      <span>Motivo</span>
-
-                      <strong>{movimentacao.motivo || "-"}</strong>
-                    </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </>
         )}
@@ -524,18 +669,26 @@ function Estoque() {
           <form
             className="estoque-movimentacao-form"
             onSubmit={confirmarMovimentacao}
+            aria-busy={salvando}
           >
             <div className="estoque-movimentacao-produto">
+              <span className="estoque-movimentacao-label">Produto</span>
+
               <strong>{produtoMovimentando.nome}</strong>
 
               <span>
-                Estoque atual: {produtoMovimentando.estoque_atual}{" "}
-                {produtoMovimentando.unidade}
+                Estoque atual:{" "}
+                {formatarQuantidade(
+                  produtoMovimentando.estoque_atual,
+                  produtoMovimentando.unidade,
+                )}
               </span>
             </div>
 
             {erroMovimentacao && (
-              <div className="form-error">{erroMovimentacao}</div>
+              <div className="form-error" role="alert">
+                {erroMovimentacao}
+              </div>
             )}
 
             <div className="form-group">
@@ -549,7 +702,6 @@ function Estoque() {
                   setTipoMovimentacao(event.target.value);
 
                   setQuantidade("");
-
                   setErroMovimentacao("");
                 }}
                 disabled={salvando}
@@ -577,6 +729,7 @@ function Estoque() {
                 id="quantidadeMovimentacao"
                 name="quantidadeMovimentacao"
                 type="number"
+                inputMode="decimal"
                 value={quantidade}
                 onChange={(event) => setQuantidade(event.target.value)}
                 min={tipoMovimentacao === "ajuste" ? "0" : "0.001"}
@@ -590,12 +743,11 @@ function Estoque() {
                 }
               />
 
-              {tipoMovimentacao === "ajuste" && (
-                <small className="estoque-ajuste-ajuda">
-                  No ajuste, informe a quantidade real que você contou no
-                  estoque.
-                </small>
-              )}
+              <small className="estoque-ajuste-ajuda">
+                {tipoMovimentacao === "ajuste"
+                  ? "Informe a quantidade real encontrada na contagem física."
+                  : `Unidade do produto: ${produtoMovimentando.unidade ?? "-"}`}
+              </small>
             </div>
 
             <div className="form-group">
@@ -611,6 +763,10 @@ function Estoque() {
                 disabled={salvando}
                 placeholder="Ex.: Compra do fornecedor, produto danificado..."
               />
+
+              <small className="estoque-ajuste-ajuda">
+                Até 500 caracteres.
+              </small>
             </div>
 
             <div className="estoque-movimentacao-actions">
