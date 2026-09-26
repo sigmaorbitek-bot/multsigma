@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 
@@ -8,10 +9,20 @@ import LoadingScreen from "../../components/LoadingScreen/LoadingScreen";
 function AuthCallback() {
   const navigate = useNavigate();
 
+  const [searchParams] = useSearchParams();
+
   const { user, loading, quantidadeEmpresas, empresaAtual } = useAuth();
 
+  const erroOAuth = searchParams.get("error");
+
+  const descricaoErro = searchParams.get("error_description");
+
+  const mensagemErro = erroOAuth
+    ? descricaoErro || "Não foi possível concluir a autenticação."
+    : "";
+
   useEffect(() => {
-    if (loading) {
+    if (loading || mensagemErro) {
       return;
     }
 
@@ -42,9 +53,36 @@ function AuthCallback() {
     navigate("/painel", {
       replace: true,
     });
-  }, [user, loading, quantidadeEmpresas, empresaAtual, navigate]);
+  }, [loading, mensagemErro, user, quantidadeEmpresas, empresaAtual, navigate]);
 
-  return <LoadingScreen mensagem="Preparando o acesso à sua empresa..." />;
+  if (mensagemErro) {
+    return (
+      <main className="loading-screen">
+        <section className="loading-screen-content">
+          <img
+            className="loading-screen-logo"
+            src="/Multsigma.png"
+            alt="Logo da Multsigma"
+          />
+
+          <p className="loading-screen-text">{mensagemErro}</p>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/login", {
+                replace: true,
+              })
+            }
+          >
+            Voltar ao login
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  return <LoadingScreen mensagem="Concluindo seu acesso..." />;
 }
 
 export default AuthCallback;
