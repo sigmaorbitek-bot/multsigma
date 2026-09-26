@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-const TIPOS_PAGAMENTO = [
+export const TIPOS_PAGAMENTO = [
   "dinheiro",
   "pix",
   "debito",
@@ -198,32 +198,36 @@ export async function finalizarVenda({
   return data;
 }
 
-export async function listarVendas(empresaId) {
+export async function listarVendas(empresaId, limite = 100) {
   validarEmpresaId(empresaId);
+
+  const limiteSeguro =
+    Number.isInteger(limite) && limite > 0 && limite <= 500 ? limite : 100;
 
   const { data, error } = await supabase
     .from("vendas")
     .select(
       `
-          id,
-          usuario_id,
-          subtotal,
-          desconto,
-          acrescimo,
-          total,
-          custo_total,
-          lucro,
-          forma_pagamento,
-          status,
-          observacoes,
-          created_at,
-          updated_at
-        `,
+        id,
+        usuario_id,
+        subtotal,
+        desconto,
+        acrescimo,
+        total,
+        custo_total,
+        lucro,
+        forma_pagamento,
+        status,
+        observacoes,
+        created_at,
+        updated_at
+      `,
     )
     .eq("empresa_id", empresaId)
     .order("created_at", {
       ascending: false,
-    });
+    })
+    .limit(limiteSeguro);
 
   if (error) {
     throw error;
@@ -243,20 +247,20 @@ export async function obterVenda({ empresaId, vendaId }) {
     .from("vendas")
     .select(
       `
-          id,
-          usuario_id,
-          subtotal,
-          desconto,
-          acrescimo,
-          total,
-          custo_total,
-          lucro,
-          forma_pagamento,
-          status,
-          observacoes,
-          created_at,
-          updated_at
-        `,
+        id,
+        usuario_id,
+        subtotal,
+        desconto,
+        acrescimo,
+        total,
+        custo_total,
+        lucro,
+        forma_pagamento,
+        status,
+        observacoes,
+        created_at,
+        updated_at
+      `,
     )
     .eq("id", vendaId)
     .eq("empresa_id", empresaId)
@@ -266,10 +270,11 @@ export async function obterVenda({ empresaId, vendaId }) {
     throw vendaError;
   }
 
-  const { data: itens, error: itensError } = await supabase
-    .from("venda_itens")
-    .select(
-      `
+  const [itensResult, pagamentosResult] = await Promise.all([
+    supabase
+      .from("venda_itens")
+      .select(
+        `
           id,
           produto_id,
           produto_nome,
@@ -279,18 +284,17 @@ export async function obterVenda({ empresaId, vendaId }) {
           desconto,
           total
         `,
-    )
-    .eq("venda_id", vendaId)
-    .eq("empresa_id", empresaId);
+      )
+      .eq("venda_id", vendaId)
+      .eq("empresa_id", empresaId)
+      .order("id", {
+        ascending: true,
+      }),
 
-  if (itensError) {
-    throw itensError;
-  }
-
-  const { data: pagamentos, error: pagamentosError } = await supabase
-    .from("venda_pagamentos")
-    .select(
-      `
+    supabase
+      .from("venda_pagamentos")
+      .select(
+        `
           id,
           tipo,
           valor,
@@ -298,17 +302,27 @@ export async function obterVenda({ empresaId, vendaId }) {
           valor_recebido,
           troco
         `,
-    )
-    .eq("venda_id", vendaId)
-    .eq("empresa_id", empresaId);
+      )
+      .eq("venda_id", vendaId)
+      .eq("empresa_id", empresaId)
+      .order("id", {
+        ascending: true,
+      }),
+  ]);
 
-  if (pagamentosError) {
-    throw pagamentosError;
+  if (itensResult.error) {
+    throw itensResult.error;
+  }
+
+  if (pagamentosResult.error) {
+    throw pagamentosResult.error;
   }
 
   return {
     ...venda,
-    itens: itens ?? [],
-    pagamentos: pagamentos ?? [],
+
+    itens: itensResult.data ?? [],
+
+    pagamentos: pagamentosResult.data ?? [],
   };
 }

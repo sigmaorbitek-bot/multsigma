@@ -1,0 +1,397 @@
+.vendas-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.vendas-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.vendas-eyebrow {
+  display: inline-block;
+
+  margin-bottom: 6px;
+
+  color: var(--cor-primaria);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.08em;
+}
+
+.vendas-page-header h1 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.vendas-page-header p {
+  margin: 8px 0 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.vendas-nova {
+  flex-shrink: 0;
+
+  min-height: 42px;
+
+  padding: 10px 18px;
+
+  border: 1px solid var(--cor-primaria);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-primaria);
+  color: var(--cor-texto-claro);
+
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.vendas-nova:hover {
+  transform: translateY(-1px);
+
+  background: var(--cor-primaria-hover);
+  border-color: var(--cor-primaria-hover);
+}
+
+.vendas-nova:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.vendas-erro {
+  padding: 12px 14px;
+
+  border: 1px solid color-mix(in srgb, var(--cor-perigo) 25%, var(--cor-borda));
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.vendas-resumo {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.vendas-resumo-card {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  padding: 20px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  box-shadow: var(--sombra-suave);
+}
+
+.vendas-resumo-card > span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.vendas-resumo-card strong {
+  overflow: hidden;
+
+  color: var(--cor-texto);
+
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vendas-resumo-card small {
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.vendas-historico {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+}
+
+.vendas-historico-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.vendas-historico-header h2 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.vendas-historico-header p {
+  margin: 6px 0 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 13px;
+}
+
+.vendas-contador {
+  flex-shrink: 0;
+
+  padding: 6px 10px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.vendas-estado,
+.vendas-vazio {
+  min-height: 220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 28px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  color: var(--cor-texto-secundario);
+
+  box-shadow: var(--sombra-suave);
+}
+
+.vendas-vazio {
+  flex-direction: column;
+
+  gap: 10px;
+
+  text-align: center;
+}
+
+.vendas-vazio-icone {
+  width: 54px;
+  height: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background: var(--cor-superficie-secundaria);
+
+  font-size: 24px;
+}
+
+.vendas-vazio strong {
+  color: var(--cor-texto);
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.vendas-vazio p {
+  max-width: 430px;
+
+  margin: 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.vendas-tabela-wrapper {
+  min-width: 0;
+
+  overflow-x: auto;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  box-shadow: var(--sombra-suave);
+}
+
+.vendas-tabela {
+  width: 100%;
+  min-width: 760px;
+
+  border-collapse: collapse;
+}
+
+.vendas-tabela th,
+.vendas-tabela td {
+  padding: 14px 16px;
+
+  border-bottom: 1px solid var(--cor-borda);
+
+  text-align: left;
+  vertical-align: middle;
+}
+
+.vendas-tabela th {
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.05em;
+}
+
+.vendas-tabela td {
+  color: var(--cor-texto);
+
+  font-size: 13px;
+}
+
+.vendas-tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.vendas-tabela tbody tr {
+  transition: background 0.2s ease;
+}
+
+.vendas-tabela tbody tr:hover {
+  background: var(--cor-superficie-secundaria);
+}
+
+.vendas-tabela td strong {
+  font-weight: 800;
+}
+
+.vendas-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px 8px;
+
+  border-radius: 999px;
+
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.vendas-status-concluida,
+.vendas-status-concluido {
+  background: color-mix(in srgb, var(--cor-sucesso) 12%, var(--cor-superficie));
+
+  color: var(--cor-sucesso);
+}
+
+.vendas-status-cancelada,
+.vendas-status-cancelado {
+  background: color-mix(in srgb, var(--cor-perigo) 10%, var(--cor-superficie));
+
+  color: var(--cor-perigo);
+}
+
+@media (max-width: 900px) {
+  .vendas-resumo {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .vendas-page {
+    gap: 20px;
+  }
+
+  .vendas-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vendas-nova {
+    width: 100%;
+  }
+
+  .vendas-historico-header {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .vendas-page-header h1 {
+    font-size: 26px;
+  }
+
+  .vendas-resumo-card {
+    padding: 16px;
+  }
+
+  .vendas-historico-header {
+    flex-direction: column;
+  }
+
+  .vendas-contador {
+    align-self: flex-start;
+  }
+}

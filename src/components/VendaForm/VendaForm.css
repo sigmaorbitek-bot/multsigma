@@ -1,0 +1,522 @@
+.venda-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.venda-form-erro {
+  padding: 12px 14px;
+
+  border: 1px solid color-mix(in srgb, var(--cor-perigo) 25%, var(--cor-borda));
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.venda-form-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.venda-form-secao-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.venda-form-secao h3,
+.venda-form-secao-header h3 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.venda-form-secao-header p {
+  margin: 4px 0 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.venda-form-adicionar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  gap: 10px;
+}
+
+.venda-form-adicionar select,
+.venda-form-grid select,
+.venda-form-grid input,
+.venda-form-item-grid input,
+.venda-form-observacoes textarea {
+  width: 100%;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+
+  font: inherit;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.venda-form-adicionar select,
+.venda-form-grid select,
+.venda-form-grid input,
+.venda-form-item-grid input {
+  min-height: 42px;
+
+  padding: 9px 11px;
+}
+
+.venda-form-observacoes textarea {
+  min-height: 110px;
+
+  padding: 11px 12px;
+
+  resize: vertical;
+}
+
+.venda-form-adicionar select:focus,
+.venda-form-grid select:focus,
+.venda-form-grid input:focus,
+.venda-form-item-grid input:focus,
+.venda-form-observacoes textarea:focus {
+  outline: none;
+
+  border-color: var(--cor-primaria);
+
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-primaria) 12%, transparent);
+}
+
+.venda-form-adicionar select:disabled,
+.venda-form-grid select:disabled,
+.venda-form-grid input:disabled,
+.venda-form-item-grid input:disabled,
+.venda-form-observacoes textarea:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.65;
+}
+
+.venda-form-adicionar button {
+  min-height: 42px;
+
+  padding: 9px 16px;
+
+  border: 1px solid var(--cor-primaria);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-primaria);
+  color: var(--cor-texto-claro);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.venda-form-adicionar button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  background: var(--cor-primaria-hover);
+  border-color: var(--cor-primaria-hover);
+}
+
+.venda-form-adicionar button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.6;
+}
+
+.venda-form-vazio {
+  padding: 24px;
+
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto-secundario);
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+.venda-form-itens {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.venda-form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 16px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+}
+
+.venda-form-item-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 14px;
+}
+
+.venda-form-item-topo > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.venda-form-item-topo strong {
+  overflow: hidden;
+
+  color: var(--cor-texto);
+
+  font-size: 14px;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.venda-form-item-topo span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+}
+
+.venda-form-item-topo button {
+  flex-shrink: 0;
+
+  padding: 5px 8px;
+
+  border: none;
+  border-radius: var(--raio-pequeno);
+
+  background: transparent;
+  color: var(--cor-perigo);
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.venda-form-item-topo button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--cor-perigo) 8%, transparent);
+}
+
+.venda-form-item-topo button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+}
+
+.venda-form-item-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.9fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap: 10px;
+}
+
+.venda-form-item-grid label,
+.venda-form-grid label,
+.venda-form-observacoes {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.venda-form-item-grid label > span,
+.venda-form-grid label > span,
+.venda-form-observacoes > span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.venda-form-item-total {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  gap: 6px;
+
+  padding-bottom: 2px;
+}
+
+.venda-form-item-total span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.venda-form-item-total strong {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 9px 11px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto);
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.venda-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.venda-form-observacoes {
+  position: relative;
+}
+
+.venda-form-observacoes small {
+  align-self: flex-end;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+}
+
+.venda-form-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 16px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.venda-form-resumo > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.venda-form-resumo span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+}
+
+.venda-form-resumo strong {
+  color: var(--cor-texto);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.venda-form-total {
+  margin-top: 4px;
+  padding-top: 12px;
+
+  border-top: 1px solid var(--cor-borda);
+}
+
+.venda-form-total span {
+  color: var(--cor-texto);
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.venda-form-total strong {
+  color: var(--cor-primaria);
+
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.venda-form-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding-top: 4px;
+}
+
+.venda-form-cancelar,
+.venda-form-finalizar {
+  min-height: 42px;
+
+  padding: 10px 16px;
+
+  border-radius: var(--raio-pequeno);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.venda-form-cancelar {
+  border: 1px solid var(--cor-borda);
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+.venda-form-cancelar:hover:not(:disabled) {
+  border-color: var(--cor-borda-forte);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.venda-form-finalizar {
+  border: 1px solid var(--cor-primaria);
+
+  background: var(--cor-primaria);
+  color: var(--cor-texto-claro);
+}
+
+.venda-form-finalizar:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  background: var(--cor-primaria-hover);
+  border-color: var(--cor-primaria-hover);
+}
+
+.venda-form-cancelar:disabled,
+.venda-form-finalizar:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.6;
+}
+
+.venda-form-cancelar:focus-visible,
+.venda-form-finalizar:focus-visible,
+.venda-form-adicionar button:focus-visible,
+.venda-form-item-topo button:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .venda-form-item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .venda-form {
+    gap: 18px;
+  }
+
+  .venda-form-adicionar {
+    grid-template-columns: 1fr;
+  }
+
+  .venda-form-adicionar button {
+    width: 100%;
+  }
+
+  .venda-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .venda-form-item-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .venda-form-acoes {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .venda-form-cancelar,
+  .venda-form-finalizar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .venda-form-item {
+    padding: 14px;
+  }
+
+  .venda-form-item-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .venda-form-item-topo {
+    gap: 10px;
+  }
+
+  .venda-form-total strong {
+    font-size: 18px;
+  }
+}

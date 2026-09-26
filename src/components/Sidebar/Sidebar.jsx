@@ -21,13 +21,14 @@ const itensDisponiveis = [
     icone: "📦",
     nome: "Estoque",
   },
-];
-
-const itensEmBreve = [
   {
+    to: "/painel/vendas",
     icone: "🛒",
     nome: "Vendas",
   },
+];
+
+const itensEmBreve = [
   {
     icone: "🧾",
     nome: "Pedidos",

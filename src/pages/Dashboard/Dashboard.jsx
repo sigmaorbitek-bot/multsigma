@@ -16,51 +16,71 @@ function Dashboard() {
   const [resumo, setResumo] = useState({
     produtosCadastrados: 0,
     produtosAtivos: 0,
+    estoqueBaixo: 0,
   });
 
-  const [loading, setLoading] = useState(true);
+  const [empresaDadosId, setEmpresaDadosId] = useState(null);
+
+  const [empresaConsultadaId, setEmpresaConsultadaId] = useState(null);
 
   const [erro, setErro] = useState("");
 
   useEffect(() => {
     if (!empresa?.id) {
-      return undefined;
+      return;
     }
 
     let cancelado = false;
 
-    async function carregarResumo() {
-      try {
-        const dados = await obterResumoDashboard(empresa.id);
-
+    obterResumoDashboard(empresa.id)
+      .then((dados) => {
         if (cancelado) {
           return;
         }
 
         setResumo(dados);
+
+        setEmpresaDadosId(empresa.id);
+
         setErro("");
-      } catch (error) {
+      })
+      .catch((error) => {
+        if (cancelado) {
+          return;
+        }
+
         console.error("Erro ao carregar dashboard:", error);
 
-        if (!cancelado) {
-          setErro("Não foi possível carregar os dados da visão geral.");
+        setErro("Não foi possível carregar os dados da visão geral.");
+      })
+      .finally(() => {
+        if (cancelado) {
+          return;
         }
-      } finally {
-        if (!cancelado) {
-          setLoading(false);
-        }
-      }
-    }
 
-    carregarResumo();
+        setEmpresaConsultadaId(empresa.id);
+      });
 
     return () => {
       cancelado = true;
     };
   }, [empresa?.id]);
 
+  const dadosSaoDaEmpresaAtual =
+    Boolean(empresa?.id) && empresaDadosId === empresa.id;
+
+  const loading = Boolean(empresa?.id) && empresaConsultadaId !== empresa.id;
+
+  const resumoAtual = dadosSaoDaEmpresaAtual
+    ? resumo
+    : {
+        produtosCadastrados: 0,
+        produtosAtivos: 0,
+        estoqueBaixo: 0,
+      };
+
   const empresaSemProdutos =
-    !loading && !erro && resumo.produtosCadastrados === 0;
+    !loading && !erro && resumoAtual.produtosCadastrados === 0;
 
   return (
     <section className="dashboard-page">
@@ -145,25 +165,21 @@ function Dashboard() {
           />
         </div>
 
-        <div className="dashboard-card-em-breve">
-          <span className="dashboard-badge-em-breve">Em breve</span>
-
-          <StatCard
-            titulo="Estoque baixo"
-            valor="—"
-            descricao="Produtos abaixo do mínimo"
-          />
-        </div>
+        <StatCard
+          titulo="Estoque baixo"
+          valor={loading ? "..." : resumoAtual.estoqueBaixo}
+          descricao="Produtos no mínimo ou abaixo"
+        />
 
         <StatCard
           titulo="Produtos cadastrados"
-          valor={loading ? "..." : resumo.produtosCadastrados}
+          valor={loading ? "..." : resumoAtual.produtosCadastrados}
           descricao="Total de produtos registrados"
         />
 
         <StatCard
           titulo="Produtos ativos"
-          valor={loading ? "..." : resumo.produtosAtivos}
+          valor={loading ? "..." : resumoAtual.produtosAtivos}
           descricao="Produtos disponíveis na operação"
         />
       </div>
