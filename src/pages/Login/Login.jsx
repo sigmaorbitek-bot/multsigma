@@ -1,8 +1,5 @@
 import { useState } from "react";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import { supabase } from "../../services/supabase";
@@ -17,32 +14,22 @@ function Login() {
   const { entrar } = useAuth();
 
   const [email, setEmail] = useState("");
+
   const [senha, setSenha] = useState("");
 
-  const [mostrarSenha, setMostrarSenha] =
-    useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const [erro, setErro] = useState("");
-  const [mensagem, setMensagem] =
-    useState("");
 
-  const [carregando, setCarregando] =
-    useState(false);
+  const [mensagem, setMensagem] = useState("");
 
-  const [
-    carregandoGoogle,
-    setCarregandoGoogle,
-  ] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
-  const [
-    recuperandoSenha,
-    setRecuperandoSenha,
-  ] = useState(false);
+  const [carregandoGoogle, setCarregandoGoogle] = useState(false);
 
-  const estaCarregando =
-    carregando ||
-    carregandoGoogle ||
-    recuperandoSenha;
+  const [recuperandoSenha, setRecuperandoSenha] = useState(false);
+
+  const estaCarregando = carregando || carregandoGoogle || recuperandoSenha;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -56,21 +43,15 @@ function Login() {
     setCarregando(true);
 
     try {
-      await entrar(
-        email.trim(),
-        senha,
-      );
+      await entrar(email.trim(), senha);
 
-      navigate("/painel");
+      navigate("/painel", {
+        replace: true,
+      });
     } catch (error) {
-      console.error(
-        "Erro no login:",
-        error,
-      );
+      console.error("Erro no login:", error);
 
-      setErro(
-        "Não foi possível entrar. Verifique o e-mail e a senha.",
-      );
+      setErro("Não foi possível entrar. Verifique o e-mail e a senha.");
     } finally {
       setCarregando(false);
     }
@@ -86,28 +67,21 @@ function Login() {
     setCarregandoGoogle(true);
 
     try {
-      const { error } =
-        await supabase.auth.signInWithOAuth({
-          provider: "google",
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
 
-          options: {
-            redirectTo:
-              `${window.location.origin}/painel`,
-          },
-        });
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
       if (error) {
         throw error;
       }
     } catch (error) {
-      console.error(
-        "Erro ao entrar com Google:",
-        error,
-      );
+      console.error("Erro ao entrar com Google:", error);
 
-      setErro(
-        "Não foi possível entrar com o Google.",
-      );
+      setErro("Não foi possível entrar com o Google.");
 
       setCarregandoGoogle(false);
     }
@@ -118,15 +92,12 @@ function Login() {
       return;
     }
 
-    const emailLimpo =
-      email.trim();
+    const emailLimpo = email.trim();
 
     if (!emailLimpo) {
       setMensagem("");
 
-      setErro(
-        "Informe seu e-mail primeiro para recuperar a senha.",
-      );
+      setErro("Informe seu e-mail primeiro para recuperar a senha.");
 
       return;
     }
@@ -136,27 +107,17 @@ function Login() {
     setRecuperandoSenha(true);
 
     try {
-      const { error } =
-        await supabase.auth.resetPasswordForEmail(
-          emailLimpo,
-          {
-            redirectTo:
-              `${window.location.origin}/redefinir-senha`,
-          },
-        );
+      const { error } = await supabase.auth.resetPasswordForEmail(emailLimpo, {
+        redirectTo: `${window.location.origin}/redefinir-senha`,
+      });
 
       if (error) {
         throw error;
       }
 
-      setMensagem(
-        "Enviamos as instruções de recuperação para o seu e-mail.",
-      );
+      setMensagem("Enviamos as instruções de recuperação para o seu e-mail.");
     } catch (error) {
-      console.error(
-        "Erro ao recuperar senha:",
-        error,
-      );
+      console.error("Erro ao recuperar senha:", error);
 
       setErro(
         "Não foi possível enviar o e-mail de recuperação. Tente novamente.",
@@ -170,10 +131,7 @@ function Login() {
     <main className="login-page">
       <section className="login-card">
         <div className="login-voltar-area">
-          <Link
-            className="login-voltar-inicio"
-            to="/"
-          >
+          <Link className="login-voltar-inicio" to="/">
             ← Voltar ao início
           </Link>
         </div>
@@ -181,20 +139,13 @@ function Login() {
         <header className="login-header">
           <div className="login-marca">
             <div className="login-logo">
-              <img
-                src={logo}
-                alt="Logo da Multsigma"
-              />
+              <img src={logo} alt="Logo da Multsigma" />
             </div>
 
             <div>
-              <h1>
-                Multsigma
-              </h1>
+              <h1>Multsigma</h1>
 
-              <p>
-                Sua gestão de múltiplas lojas.
-              </p>
+              <p>Sua gestão de múltiplas lojas.</p>
             </div>
           </div>
         </header>
@@ -205,49 +156,32 @@ function Login() {
           aria-busy={estaCarregando}
         >
           <div className="login-form-titulo">
-            <h2>
-              Entrar
-            </h2>
+            <h2>Entrar</h2>
 
-            <p>
-              Acesse o painel da sua empresa.
-            </p>
+            <p>Acesse o painel da sua empresa.</p>
           </div>
 
           {erro && (
-            <div
-              className="login-error"
-              role="alert"
-            >
+            <div className="login-error" role="alert">
               {erro}
             </div>
           )}
 
           {mensagem && (
-            <div
-              className="login-success"
-              role="status"
-              aria-live="polite"
-            >
+            <div className="login-success" role="status" aria-live="polite">
               {mensagem}
             </div>
           )}
 
           <div className="login-field">
-            <label htmlFor="email">
-              E-mail
-            </label>
+            <label htmlFor="email">E-mail</label>
 
             <input
               id="email"
               name="email"
               type="email"
               value={email}
-              onChange={(event) =>
-                setEmail(
-                  event.target.value,
-                )
-              }
+              onChange={(event) => setEmail(event.target.value)}
               placeholder="seuemail@exemplo.com"
               autoComplete="email"
               disabled={estaCarregando}
@@ -257,21 +191,15 @@ function Login() {
 
           <div className="login-field">
             <div className="login-senha-label">
-              <label htmlFor="senha">
-                Senha
-              </label>
+              <label htmlFor="senha">Senha</label>
 
               <button
                 type="button"
                 className="login-esqueci-senha"
-                onClick={
-                  esqueciMinhaSenha
-                }
+                onClick={esqueciMinhaSenha}
                 disabled={estaCarregando}
               >
-                {recuperandoSenha
-                  ? "Enviando..."
-                  : "Esqueci minha senha"}
+                {recuperandoSenha ? "Enviando..." : "Esqueci minha senha"}
               </button>
             </div>
 
@@ -279,17 +207,9 @@ function Login() {
               <input
                 id="senha"
                 name="senha"
-                type={
-                  mostrarSenha
-                    ? "text"
-                    : "password"
-                }
+                type={mostrarSenha ? "text" : "password"}
                 value={senha}
-                onChange={(event) =>
-                  setSenha(
-                    event.target.value,
-                  )
-                }
+                onChange={(event) => setSenha(event.target.value)}
                 placeholder="Digite sua senha"
                 autoComplete="current-password"
                 disabled={estaCarregando}
@@ -299,27 +219,12 @@ function Login() {
               <button
                 type="button"
                 className="login-mostrar-senha"
-                onClick={() =>
-                  setMostrarSenha(
-                    (valorAtual) =>
-                      !valorAtual,
-                  )
-                }
+                onClick={() => setMostrarSenha((valorAtual) => !valorAtual)}
                 disabled={estaCarregando}
-                aria-label={
-                  mostrarSenha
-                    ? "Ocultar senha"
-                    : "Mostrar senha"
-                }
-                title={
-                  mostrarSenha
-                    ? "Ocultar senha"
-                    : "Mostrar senha"
-                }
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                title={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
               >
-                {mostrarSenha
-                  ? "🙈"
-                  : "👁️"}
+                {mostrarSenha ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
@@ -329,60 +234,40 @@ function Login() {
             type="submit"
             disabled={estaCarregando}
           >
-            {carregando
-              ? "Entrando..."
-              : "Entrar"}
+            {carregando ? "Entrando..." : "Entrar"}
           </button>
 
           <div className="login-divisor">
-            <span>
-              ou
-            </span>
+            <span>ou</span>
           </div>
 
           <button
             className="login-google"
             type="button"
-            onClick={
-              entrarComGoogle
-            }
+            onClick={entrarComGoogle}
             disabled={estaCarregando}
           >
-            <span
-              className="login-google-icon"
-              aria-hidden="true"
-            >
+            <span className="login-google-icon" aria-hidden="true">
               G
             </span>
 
             <span>
-              {carregandoGoogle
-                ? "Conectando..."
-                : "Continuar com Google"}
+              {carregandoGoogle ? "Conectando..." : "Continuar com Google"}
             </span>
           </button>
 
           <div className="login-cadastro">
-            <span>
-              Ainda não usa o Multsigma?
-            </span>
+            <span>Ainda não usa o Multsigma?</span>
 
-            <Link to="/cadastro">
-              ✨ Cadastrar minha empresa
-            </Link>
+            <Link to="/cadastro">✨ Cadastrar minha empresa</Link>
           </div>
         </form>
 
         <footer className="login-footer">
-          <span>
-            Multsigma
-          </span>
+          <span>Multsigma</span>
 
           <span>
-            Desenvolvido por{" "}
-            <strong>
-              Sigma Orbitek
-            </strong>
+            Desenvolvido por <strong>Sigma Orbitek</strong>
           </span>
         </footer>
       </section>

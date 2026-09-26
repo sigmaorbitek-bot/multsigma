@@ -4,6 +4,8 @@ import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import CadastroEmpresa from "./pages/CadastroEmpresa/CadastroEmpresa";
 import RedefinirSenha from "./pages/RedefinirSenha/RedefinirSenha";
+import AuthCallback from "./pages/AuthCallback/AuthCallback";
+import SelecionarEmpresa from "./pages/SelecionarEmpresa/SelecionarEmpresa";
 
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Produtos from "./pages/Produtos/Produtos";
@@ -23,7 +25,11 @@ function App() {
 
         <Route path="/cadastro" element={<CadastroEmpresa />} />
 
+        <Route path="/auth/callback" element={<AuthCallback />} />
+
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+
+        <Route path="/selecionar-empresa" element={<SelecionarEmpresa />} />
 
         <Route
           path="/painel"

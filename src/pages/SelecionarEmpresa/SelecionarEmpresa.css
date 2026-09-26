@@ -1,0 +1,418 @@
+.selecionar-empresa-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: var(--cor-fundo);
+}
+
+.selecionar-empresa-card {
+  width: 100%;
+  max-width: 520px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  padding: 32px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 20px;
+
+  background: var(--cor-superficie);
+
+  box-shadow: var(--sombra-card);
+}
+
+.selecionar-empresa-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.selecionar-empresa-logo {
+  width: 64px;
+  height: 64px;
+
+  flex-shrink: 0;
+
+  object-fit: contain;
+}
+
+.selecionar-empresa-header h1 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.selecionar-empresa-header p {
+  margin: 6px 0 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.selecionar-empresa-erro {
+  padding: 12px 14px;
+
+  border: 1px solid color-mix(in srgb, var(--cor-perigo) 25%, var(--cor-borda));
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.selecionar-empresa-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selecionar-empresa-item {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 16px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 14px;
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+
+  font: inherit;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.selecionar-empresa-item:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  border-color: var(--cor-borda-forte);
+
+  background: var(--cor-superficie-secundaria);
+
+  box-shadow: var(--sombra-suave);
+}
+
+.selecionar-empresa-item:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.selecionar-empresa-item:disabled {
+  cursor: wait;
+
+  opacity: 0.7;
+}
+
+.selecionar-empresa-item-atual {
+  border-color: color-mix(in srgb, var(--cor-primaria) 30%, var(--cor-borda));
+
+  background: color-mix(in srgb, var(--cor-primaria) 4%, var(--cor-superficie));
+}
+
+.selecionar-empresa-avatar {
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+
+  background: var(--cor-superficie-secundaria);
+
+  color: var(--cor-texto-claro);
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.selecionar-empresa-avatar img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  padding: 3px;
+
+  object-fit: contain;
+}
+
+.selecionar-empresa-avatar span {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--gradiente-multsigma);
+}
+
+.selecionar-empresa-info {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.selecionar-empresa-info strong {
+  overflow: hidden;
+
+  color: var(--cor-texto);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selecionar-empresa-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.selecionar-empresa-meta > span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+}
+
+.selecionar-empresa-atual {
+  padding: 2px 7px;
+
+  border: 1px solid
+    color-mix(in srgb, var(--cor-primaria) 25%, var(--cor-borda));
+
+  border-radius: 999px;
+
+  background: color-mix(in srgb, var(--cor-primaria) 8%, var(--cor-superficie));
+
+  color: var(--cor-primaria) !important;
+
+  font-size: 10px !important;
+  font-weight: 800;
+
+  line-height: 1.4;
+}
+
+.selecionar-empresa-seta {
+  flex-shrink: 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 20px;
+  line-height: 1;
+
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.selecionar-empresa-item:hover:not(:disabled) .selecionar-empresa-seta {
+  transform: translateX(3px);
+
+  color: var(--cor-primaria);
+}
+
+.selecionar-empresa-voltar {
+  width: 100%;
+
+  min-height: 42px;
+
+  padding: 10px 16px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.selecionar-empresa-voltar:hover:not(:disabled) {
+  border-color: var(--cor-borda-forte);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.selecionar-empresa-voltar:focus-visible,
+.selecionar-empresa-sair:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+.selecionar-empresa-sair {
+  align-self: center;
+
+  padding: 9px 16px;
+
+  border: none;
+  border-radius: var(--raio-pequeno);
+
+  background: transparent;
+  color: var(--cor-texto-secundario);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.selecionar-empresa-sair:hover:not(:disabled) {
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto);
+}
+
+.selecionar-empresa-voltar:disabled,
+.selecionar-empresa-sair:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.6;
+}
+
+.selecionar-empresa-footer {
+  padding-top: 4px;
+
+  text-align: center;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+}
+
+.selecionar-empresa-footer strong {
+  color: var(--cor-texto);
+}
+
+@media (max-width: 600px) {
+  .selecionar-empresa-page {
+    padding: 16px;
+  }
+
+  .selecionar-empresa-card {
+    gap: 20px;
+
+    padding: 24px 18px;
+  }
+
+  .selecionar-empresa-logo {
+    width: 54px;
+    height: 54px;
+  }
+
+  .selecionar-empresa-header {
+    gap: 12px;
+  }
+
+  .selecionar-empresa-header h1 {
+    font-size: 21px;
+  }
+
+  .selecionar-empresa-header p {
+    font-size: 13px;
+  }
+
+  .selecionar-empresa-item {
+    gap: 12px;
+
+    padding: 14px;
+  }
+
+  .selecionar-empresa-avatar {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 420px) {
+  .selecionar-empresa-page {
+    padding: 12px;
+  }
+
+  .selecionar-empresa-card {
+    padding: 20px 14px;
+
+    border-radius: 16px;
+  }
+
+  .selecionar-empresa-header {
+    align-items: flex-start;
+  }
+
+  .selecionar-empresa-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .selecionar-empresa-item {
+    padding: 12px;
+  }
+
+  .selecionar-empresa-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .selecionar-empresa-info strong {
+    font-size: 13px;
+  }
+
+  .selecionar-empresa-seta {
+    font-size: 18px;
+  }
+}

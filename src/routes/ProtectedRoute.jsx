@@ -2,13 +2,16 @@ import { Navigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 
+import LoadingScreen from "../components/LoadingScreen/LoadingScreen";
+
 function ProtectedRoute({ children }) {
   const location = useLocation();
 
-  const { user, loading, quantidadeEmpresas, empresaAtual } = useAuth();
+  const { user, loading, precisaCadastrarEmpresa, precisaSelecionarEmpresa } =
+    useAuth();
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return <LoadingScreen mensagem="Preparando seu ambiente..." />;
   }
 
   if (!user) {
@@ -17,17 +20,17 @@ function ProtectedRoute({ children }) {
         to="/login"
         replace
         state={{
-          from: location.pathname,
+          from: location.pathname + location.search,
         }}
       />
     );
   }
 
-  if (quantidadeEmpresas === 0) {
+  if (precisaCadastrarEmpresa) {
     return <Navigate to="/cadastro" replace />;
   }
 
-  if (quantidadeEmpresas > 1 && !empresaAtual) {
+  if (precisaSelecionarEmpresa) {
     return <Navigate to="/selecionar-empresa" replace />;
   }
 

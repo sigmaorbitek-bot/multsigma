@@ -1,8 +1,6 @@
 import { supabase } from "./supabase";
 
-export async function obterResumoDashboard(
-  empresaId,
-) {
+export async function obterResumoDashboard(empresaId) {
   if (!empresaId) {
     return {
       produtosCadastrados: 0,
@@ -10,27 +8,25 @@ export async function obterResumoDashboard(
     };
   }
 
-  const [
-    produtosCadastradosResultado,
-    produtosAtivosResultado,
-  ] = await Promise.all([
-    supabase
-      .from("produtos")
-      .select("id", {
-        count: "exact",
-        head: true,
-      })
-      .eq("empresa_id", empresaId),
+  const [produtosCadastradosResultado, produtosAtivosResultado] =
+    await Promise.all([
+      supabase
+        .from("produtos")
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
+        .eq("empresa_id", empresaId),
 
-    supabase
-      .from("produtos")
-      .select("id", {
-        count: "exact",
-        head: true,
-      })
-      .eq("empresa_id", empresaId)
-      .eq("ativo", true),
-  ]);
+      supabase
+        .from("produtos")
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
+        .eq("empresa_id", empresaId)
+        .eq("ativo", true),
+    ]);
 
   if (produtosCadastradosResultado.error) {
     throw produtosCadastradosResultado.error;
@@ -41,10 +37,8 @@ export async function obterResumoDashboard(
   }
 
   return {
-    produtosCadastrados:
-      produtosCadastradosResultado.count ?? 0,
+    produtosCadastrados: produtosCadastradosResultado.count ?? 0,
 
-    produtosAtivos:
-      produtosAtivosResultado.count ?? 0,
+    produtosAtivos: produtosAtivosResultado.count ?? 0,
   };
 }

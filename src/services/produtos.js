@@ -2,32 +2,92 @@ import { supabase } from "./supabase";
 
 import { enviarImagemProduto, removerImagemProduto } from "./produtoImagens";
 
+function validarEmpresaId(empresaId) {
+  if (!empresaId) {
+    throw new Error("Empresa não informada.");
+  }
+}
+
+function validarProdutoId(produtoId) {
+  if (!produtoId) {
+    throw new Error("Produto não informado.");
+  }
+}
+
+function normalizarTexto(valor) {
+  const texto = valor?.trim();
+
+  return texto || null;
+}
+
+function converterNumero(valor, campo) {
+  const numero = Number(valor);
+
+  if (!Number.isFinite(numero)) {
+    throw new Error(`${campo} inválido.`);
+  }
+
+  return numero;
+}
+
+function converterNumeroNaoNegativo(valor, campo) {
+  const numero = converterNumero(valor, campo);
+
+  if (numero < 0) {
+    throw new Error(`${campo} não pode ser negativo.`);
+  }
+
+  return numero;
+}
+
+function validarNomeProduto(nome) {
+  const nomeLimpo = nome?.trim();
+
+  if (!nomeLimpo) {
+    throw new Error("Informe o nome do produto.");
+  }
+
+  return nomeLimpo;
+}
+
+const UNIDADES_PERMITIDAS = ["UN", "KG", "G", "L", "ML", "CX", "PCT", "M"];
+
+function validarUnidade(unidade) {
+  if (!UNIDADES_PERMITIDAS.includes(unidade)) {
+    throw new Error("Unidade de medida inválida.");
+  }
+
+  return unidade;
+}
+
 export async function listarProdutos(empresaId) {
+  validarEmpresaId(empresaId);
+
   const { data, error } = await supabase
     .from("produtos")
     .select(
       `
-      id,
-      nome,
-      sku,
-      codigo_barras,
-      descricao,
-      unidade,
-      preco_custo,
-      percentual_lucro,
-      preco_venda,
-      estoque_atual,
-      estoque_minimo,
-      imagem_path,
-      ativo,
-      exibir_na_vitrine,
-      exibir_preco,
-      permitir_pedido,
-      categorias (
-        id,
-        nome
-      )
-    `,
+          id,
+          nome,
+          sku,
+          codigo_barras,
+          descricao,
+          unidade,
+          preco_custo,
+          percentual_lucro,
+          preco_venda,
+          estoque_atual,
+          estoque_minimo,
+          imagem_path,
+          ativo,
+          exibir_na_vitrine,
+          exibir_preco,
+          permitir_pedido,
+          categorias (
+            id,
+            nome
+          )
+        `,
     )
     .eq("empresa_id", empresaId)
     .order("nome");
@@ -61,6 +121,39 @@ export async function criarProduto({
 
   imagem,
 }) {
+  validarEmpresaId(empresaId);
+
+  const nomeLimpo = validarNomeProduto(nome);
+
+  const unidadeValida = validarUnidade(unidade);
+
+  const precoCustoNumero = converterNumeroNaoNegativo(
+    precoCusto,
+    "Preço de custo",
+  );
+
+  const precoVendaNumero = converterNumeroNaoNegativo(
+    precoVenda,
+    "Preço de venda",
+  );
+
+  const estoqueInicialNumero = converterNumeroNaoNegativo(
+    estoqueInicial,
+    "Estoque inicial",
+  );
+
+  const estoqueMinimoNumero = converterNumeroNaoNegativo(
+    estoqueMinimo,
+    "Estoque mínimo",
+  );
+
+  const percentualLucroNumero =
+    percentualLucro === "" ||
+    percentualLucro === null ||
+    percentualLucro === undefined
+      ? null
+      : converterNumeroNaoNegativo(percentualLucro, "Percentual de lucro");
+
   let imagemPath = null;
 
   try {
@@ -76,34 +169,31 @@ export async function criarProduto({
 
       p_categoria_id: categoriaId || null,
 
-      p_nome: nome.trim(),
+      p_nome: nomeLimpo,
 
-      p_sku: sku?.trim() || null,
+      p_sku: normalizarTexto(sku),
 
-      p_codigo_barras: codigoBarras?.trim() || null,
+      p_codigo_barras: normalizarTexto(codigoBarras),
 
-      p_descricao: descricao?.trim() || null,
+      p_descricao: normalizarTexto(descricao),
 
-      p_unidade: unidade,
+      p_unidade: unidadeValida,
 
-      p_preco_custo: Number(precoCusto),
+      p_preco_custo: precoCustoNumero,
 
-      p_percentual_lucro:
-        percentualLucro === "" || percentualLucro === null
-          ? null
-          : Number(percentualLucro),
+      p_percentual_lucro: percentualLucroNumero,
 
-      p_preco_venda: Number(precoVenda),
+      p_preco_venda: precoVendaNumero,
 
-      p_estoque_inicial: Number(estoqueInicial),
+      p_estoque_inicial: estoqueInicialNumero,
 
-      p_estoque_minimo: Number(estoqueMinimo),
+      p_estoque_minimo: estoqueMinimoNumero,
 
-      p_exibir_na_vitrine: exibirNaVitrine,
+      p_exibir_na_vitrine: Boolean(exibirNaVitrine),
 
-      p_exibir_preco: exibirPreco,
+      p_exibir_preco: Boolean(exibirPreco),
 
-      p_permitir_pedido: permitirPedido,
+      p_permitir_pedido: Boolean(permitirPedido),
 
       p_imagem_path: imagemPath,
     });
@@ -150,6 +240,36 @@ export async function atualizarProduto({
   imagemAtualPath,
   removerImagemAtual = false,
 }) {
+  validarEmpresaId(empresaId);
+
+  validarProdutoId(produtoId);
+
+  const nomeLimpo = validarNomeProduto(nome);
+
+  const unidadeValida = validarUnidade(unidade);
+
+  const precoCustoNumero = converterNumeroNaoNegativo(
+    precoCusto,
+    "Preço de custo",
+  );
+
+  const precoVendaNumero = converterNumeroNaoNegativo(
+    precoVenda,
+    "Preço de venda",
+  );
+
+  const estoqueMinimoNumero = converterNumeroNaoNegativo(
+    estoqueMinimo,
+    "Estoque mínimo",
+  );
+
+  const percentualLucroNumero =
+    percentualLucro === "" ||
+    percentualLucro === null ||
+    percentualLucro === undefined
+      ? null
+      : converterNumeroNaoNegativo(percentualLucro, "Percentual de lucro");
+
   let novaImagemPath = null;
 
   try {
@@ -173,32 +293,29 @@ export async function atualizarProduto({
       .update({
         categoria_id: categoriaId || null,
 
-        nome: nome.trim(),
+        nome: nomeLimpo,
 
-        sku: sku?.trim() || null,
+        sku: normalizarTexto(sku),
 
-        codigo_barras: codigoBarras?.trim() || null,
+        codigo_barras: normalizarTexto(codigoBarras),
 
-        descricao: descricao?.trim() || null,
+        descricao: normalizarTexto(descricao),
 
-        unidade,
+        unidade: unidadeValida,
 
-        preco_custo: Number(precoCusto),
+        preco_custo: precoCustoNumero,
 
-        percentual_lucro:
-          percentualLucro === "" || percentualLucro === null
-            ? null
-            : Number(percentualLucro),
+        percentual_lucro: percentualLucroNumero,
 
-        preco_venda: Number(precoVenda),
+        preco_venda: precoVendaNumero,
 
-        estoque_minimo: Number(estoqueMinimo),
+        estoque_minimo: estoqueMinimoNumero,
 
-        exibir_na_vitrine: exibirNaVitrine,
+        exibir_na_vitrine: Boolean(exibirNaVitrine),
 
-        exibir_preco: exibirPreco,
+        exibir_preco: Boolean(exibirPreco),
 
-        permitir_pedido: permitirPedido,
+        permitir_pedido: Boolean(permitirPedido),
 
         imagem_path: imagemFinal,
       })
@@ -237,20 +354,36 @@ export async function atualizarProduto({
 }
 
 export async function alterarStatusProduto({ produtoId, empresaId, ativo }) {
-  const { error } = await supabase
+  validarEmpresaId(empresaId);
+
+  validarProdutoId(produtoId);
+
+  if (typeof ativo !== "boolean") {
+    throw new Error("Status do produto inválido.");
+  }
+
+  const { data, error } = await supabase
     .from("produtos")
     .update({
       ativo,
     })
     .eq("id", produtoId)
-    .eq("empresa_id", empresaId);
+    .eq("empresa_id", empresaId)
+    .select("id, ativo")
+    .single();
 
   if (error) {
     throw error;
   }
+
+  return data;
 }
 
 export async function excluirProdutoDefinitivamente({ produtoId, empresaId }) {
+  validarEmpresaId(empresaId);
+
+  validarProdutoId(produtoId);
+
   const { data, error } = await supabase.rpc("excluir_produto_seguro", {
     p_produto_id: produtoId,
 

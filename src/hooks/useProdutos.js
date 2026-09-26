@@ -17,9 +17,15 @@ async function buscarDados(empresaId) {
 
 export function useProdutos(empresaId) {
   const [produtos, setProdutos] = useState([]);
+
   const [categorias, setCategorias] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [empresaDadosId, setEmpresaDadosId] = useState(null);
+
+  const [empresaConsultadaId, setEmpresaConsultadaId] = useState(null);
+
+  const [recarregando, setRecarregando] = useState(false);
+
   const [erro, setErro] = useState("");
 
   const carregarDados = useCallback(async () => {
@@ -27,20 +33,27 @@ export function useProdutos(empresaId) {
       return;
     }
 
-    setLoading(true);
+    setRecarregando(true);
     setErro("");
 
     try {
       const dados = await buscarDados(empresaId);
 
       setProdutos(dados.produtos);
+
       setCategorias(dados.categorias);
+
+      setEmpresaDadosId(empresaId);
+
+      setEmpresaConsultadaId(empresaId);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
 
       setErro("Não foi possível carregar os produtos.");
+
+      setEmpresaConsultadaId(empresaId);
     } finally {
-      setLoading(false);
+      setRecarregando(false);
     }
   }, [empresaId]);
 
@@ -58,7 +71,11 @@ export function useProdutos(empresaId) {
         }
 
         setProdutos(dados.produtos);
+
         setCategorias(dados.categorias);
+
+        setEmpresaDadosId(empresaId);
+
         setErro("");
       })
       .catch((error) => {
@@ -71,9 +88,11 @@ export function useProdutos(empresaId) {
         setErro("Não foi possível carregar os produtos.");
       })
       .finally(() => {
-        if (!cancelado) {
-          setLoading(false);
+        if (cancelado) {
+          return;
         }
+
+        setEmpresaConsultadaId(empresaId);
       });
 
     return () => {
@@ -81,12 +100,23 @@ export function useProdutos(empresaId) {
     };
   }, [empresaId]);
 
+  const dadosSaoDaEmpresaAtual =
+    Boolean(empresaId) && empresaDadosId === empresaId;
+
+  const consultaDaEmpresaTerminou =
+    Boolean(empresaId) && empresaConsultadaId === empresaId;
+
+  const loading =
+    Boolean(empresaId) && (!consultaDaEmpresaTerminou || recarregando);
+
   return {
-    produtos,
-    categorias,
+    produtos: dadosSaoDaEmpresaAtual ? produtos : [],
+
+    categorias: dadosSaoDaEmpresaAtual ? categorias : [],
 
     loading,
-    erro,
+
+    erro: empresaId ? erro : "",
 
     carregarDados,
   };

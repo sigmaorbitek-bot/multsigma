@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
@@ -9,14 +9,22 @@ import {
   enviarLogoEmpresa,
 } from "../../services/empresas";
 
+import LoadingScreen from "../../components/LoadingScreen/LoadingScreen";
+
 import "./CadastroEmpresa.css";
 
 const logoMultsigma = "/Multsigma.png";
 
+const TIPOS_LOGO_PERMITIDOS = ["image/jpeg", "image/png", "image/webp"];
+
+const TAMANHO_MAXIMO_LOGO = 5 * 1024 * 1024;
+
 function CadastroEmpresa() {
   const navigate = useNavigate();
 
-  const { user, loading, sair, recarregarEmpresas } = useAuth();
+  const inputLogoRef = useRef(null);
+
+  const { user, loading, temEmpresa, sair, recarregarEmpresas } = useAuth();
 
   const [nomeEmpresa, setNomeEmpresa] = useState("");
 
@@ -27,6 +35,8 @@ function CadastroEmpresa() {
   const [logoPreview, setLogoPreview] = useState("");
 
   const [empresaCriadaId, setEmpresaCriadaId] = useState(null);
+
+  const [logoPendente, setLogoPendente] = useState(false);
 
   const [erro, setErro] = useState("");
 
@@ -43,6 +53,16 @@ function CadastroEmpresa() {
 
   const cadastroFinalizado = Boolean(empresaCriadaId);
 
+  function limparLogoSelecionada() {
+    setLogoArquivo(null);
+    setLogoPreview("");
+    setLogoPendente(false);
+
+    if (inputLogoRef.current) {
+      inputLogoRef.current.value = "";
+    }
+  }
+
   function selecionarLogo(event) {
     const arquivo = event.target.files?.[0];
 
@@ -50,32 +70,21 @@ function CadastroEmpresa() {
     setSucesso("");
 
     if (!arquivo) {
-      setLogoArquivo(null);
-      setLogoPreview("");
+      limparLogoSelecionada();
 
       return;
     }
 
-    const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
-
-    if (!tiposPermitidos.includes(arquivo.type)) {
-      event.target.value = "";
-
-      setLogoArquivo(null);
-      setLogoPreview("");
+    if (!TIPOS_LOGO_PERMITIDOS.includes(arquivo.type)) {
+      limparLogoSelecionada();
 
       setErro("A logo deve ser uma imagem JPG, PNG ou WEBP.");
 
       return;
     }
 
-    const tamanhoMaximo = 5 * 1024 * 1024;
-
-    if (arquivo.size > tamanhoMaximo) {
-      event.target.value = "";
-
-      setLogoArquivo(null);
-      setLogoPreview("");
+    if (arquivo.size > TAMANHO_MAXIMO_LOGO) {
+      limparLogoSelecionada();
 
       setErro("A imagem da logo deve ter no máximo 5 MB.");
 
@@ -84,6 +93,8 @@ function CadastroEmpresa() {
 
     setLogoArquivo(arquivo);
 
+    setLogoPendente(false);
+
     const leitor = new FileReader();
 
     leitor.onload = () => {
@@ -91,10 +102,7 @@ function CadastroEmpresa() {
     };
 
     leitor.onerror = () => {
-      event.target.value = "";
-
-      setLogoArquivo(null);
-      setLogoPreview("");
+      limparLogoSelecionada();
 
       setErro("Não foi possível carregar a prévia da imagem.");
     };
@@ -103,14 +111,10 @@ function CadastroEmpresa() {
   }
 
   function removerLogo() {
-    setLogoArquivo(null);
-    setLogoPreview("");
+    setErro("");
+    setSucesso("");
 
-    const input = document.getElementById("logoEmpresa");
-
-    if (input) {
-      input.value = "";
-    }
+    limparLogoSelecionada();
   }
 
   async function atualizarContextoEmpresa(empresaId) {
@@ -132,7 +136,7 @@ function CadastroEmpresa() {
     const responsavelLimpo = nomeResponsavel.trim();
 
     if (!empresaLimpa) {
-      setErro("Informe o nome da empresa.");
+      setErro("Informe o nome da empresa ou negócio.");
 
       return;
     }
@@ -178,8 +182,12 @@ function CadastroEmpresa() {
 
           arquivo: logoArquivo,
         });
+
+        setLogoPendente(false);
       } catch (error) {
         console.error("Empresa criada, mas ocorreu erro na logo:", error);
+
+        setLogoPendente(true);
 
         try {
           await atualizarContextoEmpresa(novaEmpresa.empresa_id);
@@ -219,7 +227,7 @@ function CadastroEmpresa() {
   }
 
   async function tentarEnviarLogoNovamente() {
-    if (!empresaCriadaId || !logoArquivo || carregando) {
+    if (!empresaCriadaId || !logoArquivo || !logoPendente || carregando) {
       return;
     }
 
@@ -234,18 +242,32 @@ function CadastroEmpresa() {
         arquivo: logoArquivo,
       });
 
+      setLogoPendente(false);
+    } catch (error) {
+      console.error("Erro ao reenviar logo:", error);
+
+      setErro(
+        "Ainda não foi possível enviar a logo. Você pode tentar novamente ou continuar sem ela.",
+      );
+
+      setCarregando(false);
+
+      return;
+    }
+
+    try {
       await atualizarContextoEmpresa(empresaCriadaId);
 
       navigate("/painel", {
         replace: true,
       });
     } catch (error) {
-      console.error("Erro ao reenviar logo:", error);
+      console.error("Logo enviada, mas ocorreu erro ao abrir o painel:", error);
 
-      setSucesso("Sua empresa já está cadastrada.");
+      setSucesso("A logo foi enviada com sucesso.");
 
       setErro(
-        "Ainda não foi possível enviar a logo. Você pode tentar novamente ou continuar sem ela.",
+        "Não foi possível abrir o painel automaticamente. Tente continuar novamente.",
       );
     } finally {
       setCarregando(false);
@@ -294,21 +316,21 @@ function CadastroEmpresa() {
       console.error("Erro ao trocar de conta:", error);
 
       setErro("Não foi possível sair da conta atual. Tente novamente.");
-    } finally {
+
       setCarregando(false);
     }
   }
 
   if (loading) {
-    return (
-      <main className="cadastro-page">
-        <div className="cadastro-loading">Carregando...</div>
-      </main>
-    );
+    return <LoadingScreen mensagem="Preparando o cadastro da sua empresa..." />;
   }
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (temEmpresa && !cadastroFinalizado) {
+    return <Navigate to="/painel" replace />;
   }
 
   return (
@@ -329,7 +351,7 @@ function CadastroEmpresa() {
             <div>
               <h1>Multsigma</h1>
 
-              <p>Sua gestão de múltiplas lojas.</p>
+              <p>Gestão para o seu negócio.</p>
             </div>
           </div>
         </header>
@@ -346,7 +368,7 @@ function CadastroEmpresa() {
           </div>
 
           {sucesso && (
-            <div className="cadastro-success" role="status">
+            <div className="cadastro-success" role="status" aria-live="polite">
               {sucesso}
             </div>
           )}
@@ -381,16 +403,17 @@ function CadastroEmpresa() {
                 </label>
 
                 <input
+                  ref={inputLogoRef}
                   id="logoEmpresa"
                   name="logoEmpresa"
                   className="cadastro-logo-input"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={selecionarLogo}
-                  disabled={carregando}
+                  disabled={carregando || cadastroFinalizado}
                 />
 
-                {logoArquivo && (
+                {logoArquivo && !cadastroFinalizado && (
                   <button
                     type="button"
                     className="cadastro-logo-remover"
@@ -405,7 +428,7 @@ function CadastroEmpresa() {
           </div>
 
           <div className="cadastro-field">
-            <label htmlFor="nomeEmpresa">Nome da empresa ou loja</label>
+            <label htmlFor="nomeEmpresa">Nome da empresa ou negócio</label>
 
             <input
               id="nomeEmpresa"
@@ -413,7 +436,7 @@ function CadastroEmpresa() {
               type="text"
               value={nomeEmpresa}
               onChange={(event) => setNomeEmpresa(event.target.value)}
-              placeholder="Ex.: Multsigma"
+              placeholder="Ex.: Minha Empresa"
               autoComplete="organization"
               maxLength={120}
               disabled={carregando || cadastroFinalizado}
@@ -469,7 +492,7 @@ function CadastroEmpresa() {
 
           {cadastroFinalizado && (
             <div className="cadastro-pos-criacao">
-              {logoArquivo && (
+              {logoPendente && logoArquivo && (
                 <button
                   className="cadastro-submit"
                   type="button"

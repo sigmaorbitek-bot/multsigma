@@ -18,8 +18,6 @@
   box-shadow: 0 1px 0 rgba(7, 24, 47, 0.02);
 }
 
-/* Lado esquerdo */
-
 .header-esquerda {
   min-width: 0;
 
@@ -36,6 +34,36 @@
   align-items: center;
 
   gap: 11px;
+
+  padding: 6px 8px;
+
+  border: none;
+  border-radius: var(--raio-medio);
+
+  background: transparent;
+  color: inherit;
+
+  font: inherit;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.header-empresa:hover {
+  background: var(--cor-superficie-secundaria);
+}
+
+.header-empresa:active {
+  transform: scale(0.99);
+}
+
+.header-empresa:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
 }
 
 .header-logo-area {
@@ -119,7 +147,26 @@
   white-space: nowrap;
 }
 
-/* Ações */
+.header-empresa-trocar {
+  flex-shrink: 0;
+
+  margin-left: 2px;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+  line-height: 1;
+
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.header-empresa:hover .header-empresa-trocar {
+  transform: translateY(1px);
+
+  color: var(--cor-texto);
+}
 
 .header-actions {
   flex-shrink: 0;
@@ -129,8 +176,6 @@
 
   gap: 12px;
 }
-
-/* Notificações */
 
 .header-notificacao-area {
   position: relative;
@@ -190,8 +235,6 @@
   box-shadow: var(--sombra-suave);
 }
 
-/* Usuário */
-
 .header-usuario-area {
   min-width: 0;
 
@@ -226,8 +269,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-/* Sair */
 
 .header-sair {
   min-height: 38px;
@@ -271,8 +312,6 @@
   opacity: 0.6;
 }
 
-/* Menu mobile */
-
 .header-menu {
   display: none;
 
@@ -308,8 +347,6 @@
   background: var(--cor-superficie-secundaria);
 }
 
-/* Erro */
-
 .header-erro {
   position: absolute;
 
@@ -334,8 +371,6 @@
   box-shadow: var(--sombra-card);
 }
 
-/* Tablet e mobile */
-
 @media (max-width: 768px) {
   .header {
     min-height: 64px;
@@ -359,6 +394,8 @@
     min-width: 0;
 
     flex: 1;
+
+    padding: 5px 6px;
   }
 
   .header-logo-area {
@@ -378,6 +415,10 @@
     max-width: 180px;
 
     font-size: 14px;
+  }
+
+  .header-empresa-trocar {
+    display: none;
   }
 
   .header-actions {
@@ -409,8 +450,6 @@
     right: 12px;
   }
 }
-
-/* Mobile pequeno */
 
 @media (max-width: 480px) {
   .header {

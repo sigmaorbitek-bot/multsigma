@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import { supabase } from "../../services/supabase";
@@ -6,6 +7,8 @@ import { supabase } from "../../services/supabase";
 import "./Header.css";
 
 function Header({ onAbrirMenu }) {
+  const navigate = useNavigate();
+
   const { empresa, vinculo, sair } = useAuth();
 
   const [saindo, setSaindo] = useState(false);
@@ -39,6 +42,10 @@ function Header({ onAbrirMenu }) {
     return (palavras[0][0] + palavras[palavras.length - 1][0]).toUpperCase();
   }
 
+  function handleSelecionarEmpresa() {
+    navigate("/selecionar-empresa");
+  }
+
   async function handleSair() {
     if (saindo) {
       return;
@@ -49,6 +56,10 @@ function Header({ onAbrirMenu }) {
 
     try {
       await sair();
+
+      navigate("/login", {
+        replace: true,
+      });
     } catch (error) {
       console.error("Erro ao sair:", error);
 
@@ -70,7 +81,13 @@ function Header({ onAbrirMenu }) {
           ☰
         </button>
 
-        <div className="header-empresa">
+        <button
+          className="header-empresa"
+          type="button"
+          onClick={handleSelecionarEmpresa}
+          title="Trocar empresa"
+          aria-label={`Empresa atual: ${nomeEmpresa}. Clique para trocar de empresa.`}
+        >
           <div className="header-logo-area">
             {logoUrl ? (
               <img
@@ -90,7 +107,11 @@ function Header({ onAbrirMenu }) {
 
             <strong className="header-empresa-nome">{nomeEmpresa}</strong>
           </div>
-        </div>
+
+          <span className="header-empresa-trocar" aria-hidden="true">
+            ▾
+          </span>
+        </button>
       </div>
 
       <div className="header-actions">

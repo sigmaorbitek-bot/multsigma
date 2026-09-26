@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase } from "../services/supabase";
 import { AuthContext } from "./auth-context";
@@ -9,6 +9,7 @@ function criarChaveEmpresaAtual(usuarioId) {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+
   const [session, setSession] = useState(null);
 
   const [vinculos, setVinculos] = useState([]);
@@ -19,14 +20,19 @@ export function AuthProvider({ children }) {
 
   const [loading, setLoading] = useState(true);
 
+  const usuarioAtualIdRef = useRef(null);
+
   const empresas = useMemo(() => {
     return vinculos.map((vinculo) => ({
       ...vinculo.empresa,
 
       vinculo: {
         id: vinculo.id,
+
         nome: vinculo.nome,
+
         cargo: vinculo.cargo,
+
         empresa_id: vinculo.empresa_id,
       },
     }));
@@ -59,20 +65,20 @@ export function AuthProvider({ children }) {
         .from("usuarios_empresa")
         .select(
           `
+              id,
+              nome,
+              cargo,
+              empresa_id,
+              ativo,
+              empresas (
                 id,
                 nome,
-                cargo,
-                empresa_id,
-                ativo,
-                empresas (
-                  id,
-                  nome,
-                  nome_fantasia,
-                  slug,
-                  logo_path,
-                  ativo
-                )
-              `,
+                nome_fantasia,
+                slug,
+                logo_path,
+                ativo
+              )
+            `,
         )
         .eq("usuario_id", usuarioId)
         .eq("ativo", true);
@@ -89,10 +95,15 @@ export function AuthProvider({ children }) {
         .filter((item) => item.empresas && item.empresas.ativo === true)
         .map((item) => ({
           id: item.id,
+
           nome: item.nome,
+
           cargo: item.cargo,
+
           empresa_id: item.empresa_id,
+
           ativo: item.ativo,
+
           empresa: item.empresas,
         }));
 
@@ -153,6 +164,10 @@ export function AuthProvider({ children }) {
         throw new Error("Usuário não autenticado.");
       }
 
+      if (!empresaId) {
+        throw new Error("Empresa não informada.");
+      }
+
       const vinculo = vinculos.find((item) => item.empresa_id === empresaId);
 
       if (!vinculo) {
@@ -195,9 +210,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let ativo = true;
 
-    async function carregarSessao() {
-      setLoading(true);
-
+    async function carregarSessaoInicial() {
       try {
         const {
           data: { session: sessaoAtual },
@@ -212,9 +225,11 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        setSession(sessaoAtual);
-
         const usuario = sessaoAtual?.user ?? null;
+
+        usuarioAtualIdRef.current = usuario?.id ?? null;
+
+        setSession(sessaoAtual);
 
         setUser(usuario);
 
@@ -226,12 +241,16 @@ export function AuthProvider({ children }) {
       } catch (error) {
         console.error("Erro ao carregar sessão:", error);
 
-        if (ativo) {
-          setSession(null);
-          setUser(null);
-
-          limparDadosEmpresa();
+        if (!ativo) {
+          return;
         }
+
+        usuarioAtualIdRef.current = null;
+
+        setSession(null);
+        setUser(null);
+
+        limparDadosEmpresa();
       } finally {
         if (ativo) {
           setLoading(false);
@@ -239,25 +258,42 @@ export function AuthProvider({ children }) {
       }
     }
 
-    carregarSessao();
+    carregarSessaoInicial();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, novaSessao) => {
+    } = supabase.auth.onAuthStateChange((event, novaSessao) => {
       if (!ativo) {
         return;
       }
 
-      setSession(novaSessao);
+      if (event === "INITIAL_SESSION") {
+        return;
+      }
 
       const usuario = novaSessao?.user ?? null;
+
+      const usuarioAnteriorId = usuarioAtualIdRef.current;
+
+      usuarioAtualIdRef.current = usuario?.id ?? null;
+
+      setSession(novaSessao);
 
       setUser(usuario);
 
       if (!usuario) {
         limparDadosEmpresa();
+
         setLoading(false);
 
+        return;
+      }
+
+      if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        return;
+      }
+
+      if (event === "SIGNED_IN" && usuarioAnteriorId === usuario.id) {
         return;
       }
 
@@ -288,8 +324,19 @@ export function AuthProvider({ children }) {
   }, [carregarEmpresas, limparDadosEmpresa]);
 
   async function entrar(email, senha) {
+    const emailLimpo = email?.trim();
+
+    if (!emailLimpo) {
+      throw new Error("Informe o e-mail.");
+    }
+
+    if (!senha) {
+      throw new Error("Informe a senha.");
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: emailLimpo,
+
       password: senha,
     });
 
@@ -307,6 +354,8 @@ export function AuthProvider({ children }) {
       throw error;
     }
 
+    usuarioAtualIdRef.current = null;
+
     setSession(null);
     setUser(null);
 
@@ -318,19 +367,28 @@ export function AuthProvider({ children }) {
       value={{
         user,
         session,
+
         empresas,
         vinculos,
+
         empresaAtual,
         vinculoAtual,
+
         empresa: empresaAtual,
+
         vinculo: vinculoAtual,
+
         quantidadeEmpresas,
         temEmpresa,
+
         precisaCadastrarEmpresa,
         precisaSelecionarEmpresa,
+
         loading,
+
         entrar,
         sair,
+
         selecionarEmpresa,
         limparEmpresaAtual,
         recarregarEmpresas,

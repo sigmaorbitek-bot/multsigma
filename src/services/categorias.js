@@ -1,6 +1,14 @@
 import { supabase } from "./supabase";
 
+function validarEmpresaId(empresaId) {
+  if (!empresaId) {
+    throw new Error("Empresa não informada.");
+  }
+}
+
 export async function listarCategorias(empresaId) {
+  validarEmpresaId(empresaId);
+
   const { data, error } = await supabase
     .from("categorias")
     .select("id, nome, ativo")
@@ -15,14 +23,19 @@ export async function listarCategorias(empresaId) {
   return data ?? [];
 }
 
-export async function criarCategoria({
-  empresaId,
-  nome,
-}) {
-  const nomeLimpo = nome.trim();
+export async function criarCategoria({ empresaId, nome }) {
+  validarEmpresaId(empresaId);
+
+  const nomeLimpo = nome?.trim();
 
   if (!nomeLimpo) {
     throw new Error("Informe o nome da categoria.");
+  }
+
+  if (nomeLimpo.length > 120) {
+    throw new Error(
+      "O nome da categoria deve possuir no máximo 120 caracteres.",
+    );
   }
 
   const { data, error } = await supabase
@@ -36,9 +49,7 @@ export async function criarCategoria({
 
   if (error) {
     if (error.code === "23505") {
-      throw new Error(
-        "Já existe uma categoria com esse nome.",
-      );
+      throw new Error("Já existe uma categoria com esse nome.");
     }
 
     throw error;
