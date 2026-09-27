@@ -4,6 +4,10 @@
   gap: 22px;
 }
 
+.venda-form-embutido {
+  gap: 20px;
+}
+
 .venda-form-erro {
   padding: 12px 14px;
 
@@ -18,10 +22,143 @@
   line-height: 1.5;
 }
 
+.venda-form-caixa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 20px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-suave);
+}
+
+.venda-form-caixa-header > div:first-child {
+  min-width: 0;
+}
+
+.venda-form-caixa-header > div:first-child > span {
+  display: inline-block;
+
+  margin-bottom: 5px;
+
+  color: var(--cor-primaria);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+}
+
+.venda-form-caixa-header h2 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.venda-form-caixa-header p {
+  margin: 6px 0 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.venda-form-caixa-status {
+  min-width: 90px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  padding: 12px 16px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.venda-form-caixa-status span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.venda-form-caixa-status strong {
+  color: var(--cor-texto);
+
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.venda-form-caixa-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.75fr);
+
+  align-items: start;
+
+  gap: 20px;
+}
+
+.venda-form-caixa-principal,
+.venda-form-caixa-resumo {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.venda-form-caixa-principal {
+  padding: 20px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-suave);
+}
+
+.venda-form-caixa-resumo {
+  position: sticky;
+  top: 18px;
+
+  padding: 20px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  box-shadow: var(--sombra-suave);
+}
+
 .venda-form-secao {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.venda-form-secao + .venda-form-secao {
+  padding-top: 18px;
+
+  border-top: 1px solid var(--cor-borda);
 }
 
 .venda-form-secao-header {
@@ -156,6 +293,12 @@
 }
 
 .venda-form-vazio {
+  min-height: 120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   padding: 24px;
 
   border: 1px dashed var(--cor-borda);
@@ -257,7 +400,7 @@
 .venda-form-item-grid {
   display: grid;
   grid-template-columns:
-    minmax(0, 0.9fr)
+    minmax(0, 0.8fr)
     minmax(0, 1fr)
     minmax(0, 1fr)
     minmax(0, 1fr);
@@ -325,6 +468,10 @@
   gap: 12px;
 }
 
+.venda-form-grid-pagamento {
+  grid-template-columns: 1fr;
+}
+
 .venda-form-observacoes {
   position: relative;
 }
@@ -337,10 +484,45 @@
   font-size: 10px;
 }
 
+.venda-form-troco {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.venda-form-troco span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.venda-form-troco strong {
+  min-height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 12px;
+
+  border: 1px solid color-mix(in srgb, var(--cor-sucesso) 25%, var(--cor-borda));
+
+  border-radius: var(--raio-pequeno);
+
+  background: color-mix(in srgb, var(--cor-sucesso) 7%, var(--cor-superficie));
+
+  color: var(--cor-sucesso);
+
+  font-size: 20px;
+  font-weight: 900;
+}
+
 .venda-form-resumo {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 11px;
 
   padding: 16px;
 
@@ -373,7 +555,7 @@
 
 .venda-form-total {
   margin-top: 4px;
-  padding-top: 12px;
+  padding-top: 14px;
 
   border-top: 1px solid var(--cor-borda);
 }
@@ -381,30 +563,28 @@
 .venda-form-total span {
   color: var(--cor-texto);
 
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
 }
 
 .venda-form-total strong {
   color: var(--cor-primaria);
 
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 900;
 }
 
 .venda-form-acoes {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  flex-direction: column;
 
   gap: 10px;
-
-  padding-top: 4px;
 }
 
 .venda-form-cancelar,
 .venda-form-finalizar {
-  min-height: 42px;
+  width: 100%;
+  min-height: 44px;
 
   padding: 10px 16px;
 
@@ -437,10 +617,15 @@
 }
 
 .venda-form-finalizar {
+  min-height: 50px;
+
   border: 1px solid var(--cor-primaria);
 
   background: var(--cor-primaria);
   color: var(--cor-texto-claro);
+
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .venda-form-finalizar:hover:not(:disabled) {
@@ -465,15 +650,83 @@
   outline-offset: 2px;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1100px) {
+  .venda-form-caixa-layout {
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  }
+
   .venda-form-item-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .venda-form-caixa-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .venda-form-caixa-resumo {
+    position: static;
+  }
+
+  .venda-form-grid-pagamento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .venda-form-acoes {
+    flex-direction: row;
+  }
+
+  .venda-form-cancelar,
+  .venda-form-finalizar {
+    width: auto;
+  }
+
+  .venda-form-finalizar {
+    flex: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .venda-form-caixa-header {
+    align-items: flex-start;
+  }
+
+  .venda-form-item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .venda-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .venda-form-grid-pagamento {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 600px) {
   .venda-form {
     gap: 18px;
+  }
+
+  .venda-form-caixa-header {
+    padding: 16px;
+  }
+
+  .venda-form-caixa-header h2 {
+    font-size: 20px;
+  }
+
+  .venda-form-caixa-status {
+    min-width: 70px;
+
+    padding: 9px 12px;
+  }
+
+  .venda-form-caixa-principal,
+  .venda-form-caixa-resumo {
+    padding: 16px;
   }
 
   .venda-form-adicionar {
@@ -484,17 +737,8 @@
     width: 100%;
   }
 
-  .venda-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .venda-form-item-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .venda-form-acoes {
     flex-direction: column-reverse;
-    align-items: stretch;
   }
 
   .venda-form-cancelar,
@@ -504,6 +748,18 @@
 }
 
 @media (max-width: 420px) {
+  .venda-form-caixa-header {
+    gap: 12px;
+  }
+
+  .venda-form-caixa-status {
+    min-width: 62px;
+  }
+
+  .venda-form-caixa-status strong {
+    font-size: 18px;
+  }
+
   .venda-form-item {
     padding: 14px;
   }
@@ -517,6 +773,72 @@
   }
 
   .venda-form-total strong {
+    font-size: 22px;
+  }
+
+  .venda-form-troco strong {
     font-size: 18px;
   }
+}
+
+.venda-form-quantidade {
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns: 38px minmax(55px, 1fr) 38px;
+
+  gap: 5px;
+}
+
+.venda-form-quantidade input {
+  min-width: 0;
+
+  text-align: center;
+}
+
+.venda-form-quantidade button {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto);
+
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.venda-form-quantidade button:hover:not(:disabled) {
+  border-color: var(--cor-primaria);
+
+  background: color-mix(in srgb, var(--cor-primaria) 7%, var(--cor-superficie));
+
+  color: var(--cor-primaria);
+}
+
+.venda-form-quantidade button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.4;
+}
+
+.venda-form-quantidade button:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
 }

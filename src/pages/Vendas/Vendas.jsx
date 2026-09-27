@@ -54,13 +54,13 @@ function formatarStatus(status) {
 function Vendas() {
   const { empresa } = useAuth();
 
+  const [abaAtiva, setAbaAtiva] = useState("caixa");
+
   const [vendas, setVendas] = useState([]);
 
   const [empresaDadosId, setEmpresaDadosId] = useState(null);
 
   const [empresaConsultadaId, setEmpresaConsultadaId] = useState(null);
-
-  const [vendaFormAberto, setVendaFormAberto] = useState(false);
 
   const [recarregando, setRecarregando] = useState(false);
 
@@ -136,6 +136,8 @@ function Vendas() {
 
   async function handleVendaFinalizada() {
     await carregarVendas();
+
+    setAbaAtiva("historico");
   }
 
   const dadosSaoDaEmpresaAtual =
@@ -166,141 +168,186 @@ function Vendas() {
     vendasHoje.length > 0 ? faturamentoHoje / vendasHoje.length : 0;
 
   return (
-    <>
-      <section className="vendas-page">
-        <div className="vendas-page-header">
-          <div>
-            <span className="vendas-eyebrow">GESTÃO DE VENDAS</span>
+    <section className="vendas-page">
+      <div className="vendas-page-header">
+        <div>
+          <span className="vendas-eyebrow">GESTÃO DE VENDAS</span>
 
-            <h1>Vendas</h1>
+          <h1>Vendas</h1>
 
-            <p>Registre vendas e acompanhe os resultados da empresa.</p>
+          <p>Registre novas vendas e acompanhe todo o histórico da empresa.</p>
+        </div>
+      </div>
+
+      {erro && (
+        <div className="vendas-erro" role="alert">
+          {erro}
+        </div>
+      )}
+
+      <div className="vendas-abas" role="tablist" aria-label="Áreas de vendas">
+        <button
+          className={`vendas-aba ${
+            abaAtiva === "caixa" ? "vendas-aba-ativa" : ""
+          }`}
+          type="button"
+          role="tab"
+          aria-selected={abaAtiva === "caixa"}
+          onClick={() => setAbaAtiva("caixa")}
+        >
+          <span aria-hidden="true">🛒</span>
+          Caixa
+        </button>
+
+        <button
+          className={`vendas-aba ${
+            abaAtiva === "historico" ? "vendas-aba-ativa" : ""
+          }`}
+          type="button"
+          role="tab"
+          aria-selected={abaAtiva === "historico"}
+          onClick={() => setAbaAtiva("historico")}
+        >
+          <span aria-hidden="true">📋</span>
+          Histórico
+        </button>
+      </div>
+
+      {abaAtiva === "caixa" && (
+        <div className="vendas-caixa">
+          <VendaForm
+            modo="embutido"
+            aberto
+            empresaId={empresa?.id}
+            onVendaFinalizada={handleVendaFinalizada}
+          />
+        </div>
+      )}
+
+      {abaAtiva === "historico" && (
+        <>
+          <div className="vendas-resumo">
+            <article className="vendas-resumo-card">
+              <span>Vendas hoje</span>
+
+              <strong>
+                {loading || recarregando ? "..." : vendasHoje.length}
+              </strong>
+
+              <small>Vendas concluídas hoje</small>
+            </article>
+
+            <article className="vendas-resumo-card">
+              <span>Faturamento hoje</span>
+
+              <strong>
+                {loading || recarregando
+                  ? "..."
+                  : formatarMoeda(faturamentoHoje)}
+              </strong>
+
+              <small>Total vendido hoje</small>
+            </article>
+
+            <article className="vendas-resumo-card">
+              <span>Ticket médio</span>
+
+              <strong>
+                {loading || recarregando ? "..." : formatarMoeda(ticketMedio)}
+              </strong>
+
+              <small>Média por venda hoje</small>
+            </article>
           </div>
 
-          <button
-            className="vendas-nova"
-            type="button"
-            onClick={() => setVendaFormAberto(true)}
-            disabled={!empresa?.id || recarregando}
-          >
-            + Nova venda
-          </button>
-        </div>
+          <div className="vendas-historico">
+            <div className="vendas-historico-header">
+              <div>
+                <h2>Histórico de vendas</h2>
 
-        {erro && (
-          <div className="vendas-erro" role="alert">
-            {erro}
-          </div>
-        )}
+                <p>Consulte as vendas registradas recentemente.</p>
+              </div>
 
-        <div className="vendas-resumo">
-          <article className="vendas-resumo-card">
-            <span>Vendas hoje</span>
-
-            <strong>{loading ? "..." : vendasHoje.length}</strong>
-
-            <small>Vendas concluídas hoje</small>
-          </article>
-
-          <article className="vendas-resumo-card">
-            <span>Faturamento hoje</span>
-
-            <strong>{loading ? "..." : formatarMoeda(faturamentoHoje)}</strong>
-
-            <small>Total vendido hoje</small>
-          </article>
-
-          <article className="vendas-resumo-card">
-            <span>Ticket médio</span>
-
-            <strong>{loading ? "..." : formatarMoeda(ticketMedio)}</strong>
-
-            <small>Média por venda hoje</small>
-          </article>
-        </div>
-
-        <div className="vendas-historico">
-          <div className="vendas-historico-header">
-            <div>
-              <h2>Histórico de vendas</h2>
-
-              <p>Consulte as vendas registradas recentemente.</p>
+              {!loading && !recarregando && (
+                <span className="vendas-contador">
+                  {vendasAtuais.length}{" "}
+                  {vendasAtuais.length === 1 ? "registro" : "registros"}
+                </span>
+              )}
             </div>
 
-            {!loading && (
-              <span className="vendas-contador">
-                {vendasAtuais.length}{" "}
-                {vendasAtuais.length === 1 ? "registro" : "registros"}
-              </span>
+            {loading || recarregando ? (
+              <div className="vendas-estado">Carregando vendas...</div>
+            ) : vendasAtuais.length === 0 ? (
+              <div className="vendas-vazio">
+                <div className="vendas-vazio-icone">🛒</div>
+
+                <strong>Nenhuma venda registrada</strong>
+
+                <p>
+                  Use a aba Caixa para registrar a primeira venda da empresa.
+                </p>
+              </div>
+            ) : (
+              <div className="vendas-tabela-wrapper">
+                <table className="vendas-tabela">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+
+                      <th>Pagamento</th>
+
+                      <th>Status</th>
+
+                      <th>Total</th>
+
+                      <th>Lucro</th>
+
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {vendasAtuais.map((venda) => (
+                      <tr key={venda.id}>
+                        <td>{formatarData(venda.created_at)}</td>
+
+                        <td>{formatarFormaPagamento(venda.forma_pagamento)}</td>
+
+                        <td>
+                          <span
+                            className={`vendas-status vendas-status-${venda.status}`}
+                          >
+                            {formatarStatus(venda.status)}
+                          </span>
+                        </td>
+
+                        <td>
+                          <strong>{formatarMoeda(venda.total)}</strong>
+                        </td>
+
+                        <td>{formatarMoeda(venda.lucro)}</td>
+
+                        <td>
+                          <button
+                            className="vendas-detalhes"
+                            type="button"
+                            disabled
+                            title="Detalhes da venda será o próximo passo"
+                          >
+                            Ver detalhes
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
-
-          {loading ? (
-            <div className="vendas-estado">Carregando vendas...</div>
-          ) : vendasAtuais.length === 0 ? (
-            <div className="vendas-vazio">
-              <div className="vendas-vazio-icone">🛒</div>
-
-              <strong>Nenhuma venda registrada</strong>
-
-              <p>
-                Clique em “Nova venda” para registrar a primeira venda da
-                empresa.
-              </p>
-            </div>
-          ) : (
-            <div className="vendas-tabela-wrapper">
-              <table className="vendas-tabela">
-                <thead>
-                  <tr>
-                    <th>Data</th>
-
-                    <th>Pagamento</th>
-
-                    <th>Status</th>
-
-                    <th>Total</th>
-
-                    <th>Lucro</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {vendasAtuais.map((venda) => (
-                    <tr key={venda.id}>
-                      <td>{formatarData(venda.created_at)}</td>
-
-                      <td>{formatarFormaPagamento(venda.forma_pagamento)}</td>
-
-                      <td>
-                        <span
-                          className={`vendas-status vendas-status-${venda.status}`}
-                        >
-                          {formatarStatus(venda.status)}
-                        </span>
-                      </td>
-
-                      <td>
-                        <strong>{formatarMoeda(venda.total)}</strong>
-                      </td>
-
-                      <td>{formatarMoeda(venda.lucro)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <VendaForm
-        aberto={vendaFormAberto}
-        onFechar={() => setVendaFormAberto(false)}
-        empresaId={empresa?.id}
-        onVendaFinalizada={handleVendaFinalizada}
-      />
-    </>
+        </>
+      )}
+    </section>
   );
 }
 

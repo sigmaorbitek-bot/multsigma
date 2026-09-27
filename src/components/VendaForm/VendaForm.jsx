@@ -28,7 +28,17 @@ function obterNomePagamento(tipo) {
   return nomes[tipo] || tipo;
 }
 
-function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
+function VendaForm({
+  aberto = false,
+  modo = "modal",
+  onFechar,
+  empresaId,
+  onVendaFinalizada,
+}) {
+  const embutido = modo === "embutido";
+
+  const ativo = embutido || aberto;
+
   const [produtos, setProdutos] = useState([]);
 
   const [produtoSelecionadoId, setProdutoSelecionadoId] = useState("");
@@ -56,7 +66,7 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
   const [erro, setErro] = useState("");
 
   useEffect(() => {
-    if (!aberto || !empresaId) {
+    if (!ativo || !empresaId) {
       return;
     }
 
@@ -98,7 +108,7 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
     return () => {
       cancelado = true;
     };
-  }, [aberto, empresaId]);
+  }, [ativo, empresaId]);
 
   const produtosSaoDaEmpresaAtual =
     Boolean(empresaId) && empresaProdutosId === empresaId;
@@ -106,13 +116,13 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
   const produtosDisponiveis = produtosSaoDaEmpresaAtual ? produtos : [];
 
   const loadingProdutos = Boolean(
-    aberto && empresaId && empresaConsultadaId !== empresaId,
+    ativo && empresaId && empresaConsultadaId !== empresaId,
   );
 
   const subtotal = useMemo(() => {
     return itens.reduce(
-      (total, item) =>
-        total +
+      (totalAtual, item) =>
+        totalAtual +
         Number(item.precoVenda) * Number(item.quantidade) -
         Number(item.desconto || 0),
       0,
@@ -125,6 +135,20 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
       subtotal - Number(desconto || 0) + Number(acrescimo || 0),
     );
   }, [subtotal, desconto, acrescimo]);
+
+  const troco = useMemo(() => {
+    if (tipoPagamento !== "dinheiro") {
+      return 0;
+    }
+
+    const recebido = Number(valorRecebido || 0);
+
+    if (!Number.isFinite(recebido)) {
+      return 0;
+    }
+
+    return Math.max(0, recebido - total);
+  }, [tipoPagamento, valorRecebido, total]);
 
   function adicionarProduto() {
     setErro("");
@@ -187,10 +211,48 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
         item.produtoId === produtoId
           ? {
               ...item,
-              quantidade: quantidade,
+              quantidade,
             }
           : item,
       ),
+    );
+  }
+
+  function diminuirQuantidade(produtoId) {
+    setItens((atuais) =>
+      atuais.map((item) => {
+        if (item.produtoId !== produtoId) {
+          return item;
+        }
+
+        const quantidadeAtual = Number(item.quantidade) || 0;
+
+        const novaQuantidade = Math.max(1, quantidadeAtual - 1);
+
+        return {
+          ...item,
+          quantidade: novaQuantidade,
+        };
+      }),
+    );
+  }
+
+  function aumentarQuantidade(produtoId) {
+    setItens((atuais) =>
+      atuais.map((item) => {
+        if (item.produtoId !== produtoId) {
+          return item;
+        }
+
+        const quantidadeAtual = Number(item.quantidade) || 0;
+
+        const novaQuantidade = Math.min(item.estoqueAtual, quantidadeAtual + 1);
+
+        return {
+          ...item,
+          quantidade: novaQuantidade,
+        };
+      }),
     );
   }
 
@@ -232,14 +294,16 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
     setErro("");
   }
 
-  function handleFechar() {
+  function handleCancelar() {
     if (finalizando) {
       return;
     }
 
     limparFormulario();
 
-    onFechar?.();
+    if (!embutido) {
+      onFechar?.();
+    }
   }
 
   async function handleFinalizarVenda() {
@@ -256,24 +320,31 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
     }
 
     for (const item of itens) {
-      if (
-        !Number.isFinite(Number(item.quantidade)) ||
-        Number(item.quantidade) <= 0
-      ) {
+      const quantidade = Number(item.quantidade);
+
+      if (!Number.isFinite(quantidade) || quantidade <= 0) {
         setErro(`Informe uma quantidade válida para ${item.nome}.`);
 
         return;
       }
 
-      if (Number(item.quantidade) > Number(item.estoqueAtual)) {
+      if (quantidade > Number(item.estoqueAtual)) {
         setErro(`Estoque insuficiente para ${item.nome}.`);
 
         return;
       }
 
-      const valorBruto = Number(item.precoVenda) * Number(item.quantidade);
+      const valorBruto = Number(item.precoVenda) * quantidade;
 
-      if (Number(item.desconto || 0) > valorBruto) {
+      const descontoItem = Number(item.desconto || 0);
+
+      if (!Number.isFinite(descontoItem) || descontoItem < 0) {
+        setErro(`Informe um desconto válido para ${item.nome}.`);
+
+        return;
+      }
+
+      if (descontoItem > valorBruto) {
         setErro(
           `O desconto de ${item.nome} não pode ser maior que o valor do item.`,
         );
@@ -282,20 +353,64 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
       }
     }
 
+    const descontoGeral = Number(desconto || 0);
+
+    const acrescimoGeral = Number(acrescimo || 0);
+
+    if (!Number.isFinite(descontoGeral) || descontoGeral < 0) {
+      setErro("Informe um desconto geral válido.");
+
+      return;
+    }
+
+    if (!Number.isFinite(acrescimoGeral) || acrescimoGeral < 0) {
+      setErro("Informe um acréscimo válido.");
+
+      return;
+    }
+
     if (total <= 0) {
       setErro("O total da venda deve ser maior que zero.");
 
       return;
     }
 
+    if (tipoPagamento === "credito") {
+      const parcelasNumero = Number(parcelas);
+
+      if (!Number.isInteger(parcelasNumero) || parcelasNumero < 1) {
+        setErro("Informe uma quantidade de parcelas válida.");
+
+        return;
+      }
+    }
+
+    if (tipoPagamento === "dinheiro") {
+      const recebido = Number(valorRecebido);
+
+      if (!Number.isFinite(recebido)) {
+        setErro("Informe o valor recebido.");
+
+        return;
+      }
+
+      if (recebido < total) {
+        setErro("O valor recebido é menor que o total da venda.");
+
+        return;
+      }
+    }
+
     const pagamento = {
       tipo: tipoPagamento,
+
       valor: total,
-      parcelas: tipoPagamento === "credito" ? Number(parcelas) || 1 : 1,
+
+      parcelas: tipoPagamento === "credito" ? Number(parcelas) : 1,
     };
 
     if (tipoPagamento === "dinheiro") {
-      pagamento.valorRecebido = valorRecebido;
+      pagamento.valorRecebido = Number(valorRecebido);
     }
 
     setFinalizando(true);
@@ -314,18 +429,45 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
 
         pagamentos: [pagamento],
 
-        desconto: Number(desconto || 0),
+        desconto: descontoGeral,
 
-        acrescimo: Number(acrescimo || 0),
+        acrescimo: acrescimoGeral,
 
         observacoes,
       });
 
+      const vendaFinalizada = {
+        resultado,
+
+        itens: itens.map((item) => ({
+          ...item,
+        })),
+
+        subtotal,
+
+        desconto: descontoGeral,
+
+        acrescimo: acrescimoGeral,
+
+        total,
+
+        pagamento: {
+          ...pagamento,
+          troco,
+        },
+
+        observacoes,
+
+        finalizadaEm: new Date().toISOString(),
+      };
+
       limparFormulario();
 
-      await onVendaFinalizada?.(resultado);
+      await onVendaFinalizada?.(vendaFinalizada);
 
-      onFechar?.();
+      if (!embutido) {
+        onFechar?.();
+      }
     } catch (error) {
       console.error("Erro ao finalizar venda:", error);
 
@@ -335,302 +477,371 @@ function VendaForm({ aberto, onFechar, empresaId, onVendaFinalizada }) {
     }
   }
 
-  return (
-    <Modal aberto={aberto} titulo="Nova venda" onFechar={handleFechar}>
-      <div className="venda-form">
-        {erro && (
-          <div className="venda-form-erro" role="alert">
-            {erro}
+  const conteudo = (
+    <div className={`venda-form ${embutido ? "venda-form-embutido" : ""}`}>
+      {erro && (
+        <div className="venda-form-erro" role="alert">
+          {erro}
+        </div>
+      )}
+
+      {embutido && (
+        <div className="venda-form-caixa-header">
+          <div>
+            <span>CAIXA</span>
+
+            <h2>Nova venda</h2>
+
+            <p>Adicione os produtos e finalize o pagamento.</p>
           </div>
-        )}
 
-        <section className="venda-form-secao">
-          <div className="venda-form-secao-header">
-            <div>
-              <h3>Produtos</h3>
+          <div className="venda-form-caixa-status">
+            <span>Itens</span>
 
-              <p>Adicione os produtos que fazem parte da venda.</p>
+            <strong>{itens.length}</strong>
+          </div>
+        </div>
+      )}
+
+      <div className={embutido ? "venda-form-caixa-layout" : ""}>
+        <div className="venda-form-caixa-principal">
+          <section className="venda-form-secao">
+            <div className="venda-form-secao-header">
+              <div>
+                <h3>Produtos</h3>
+
+                <p>Adicione os produtos que fazem parte da venda.</p>
+              </div>
             </div>
-          </div>
 
-          <div className="venda-form-adicionar">
-            <select
-              value={produtoSelecionadoId}
-              onChange={(event) => setProdutoSelecionadoId(event.target.value)}
-              disabled={loadingProdutos || finalizando}
-            >
-              <option value="">
-                {loadingProdutos
-                  ? "Carregando produtos..."
-                  : "Selecione um produto"}
-              </option>
-
-              {produtosDisponiveis.map((produto) => (
-                <option key={produto.id} value={produto.id}>
-                  {produto.nome} — {formatarMoeda(produto.preco_venda)} —
-                  Estoque: {produto.estoque_atual} {produto.unidade}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="button"
-              onClick={adicionarProduto}
-              disabled={loadingProdutos || finalizando}
-            >
-              Adicionar
-            </button>
-          </div>
-
-          {itens.length === 0 ? (
-            <div className="venda-form-vazio">Nenhum produto adicionado.</div>
-          ) : (
-            <div className="venda-form-itens">
-              {itens.map((item) => {
-                const totalItem =
-                  Number(item.precoVenda) * Number(item.quantidade) -
-                  Number(item.desconto || 0);
-
-                return (
-                  <article key={item.produtoId} className="venda-form-item">
-                    <div className="venda-form-item-topo">
-                      <div>
-                        <strong>{item.nome}</strong>
-
-                        <span>
-                          Estoque disponível: {item.estoqueAtual} {item.unidade}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => removerItem(item.produtoId)}
-                        disabled={finalizando}
-                      >
-                        Remover
-                      </button>
-                    </div>
-
-                    <div className="venda-form-item-grid">
-                      <label>
-                        <span>Quantidade</span>
-
-                        <input
-                          type="number"
-                          min="0.001"
-                          step="0.001"
-                          value={item.quantidade}
-                          onChange={(event) =>
-                            atualizarQuantidade(
-                              item.produtoId,
-                              event.target.value,
-                            )
-                          }
-                          disabled={finalizando}
-                        />
-                      </label>
-
-                      <label>
-                        <span>Preço</span>
-
-                        <input
-                          type="text"
-                          value={formatarMoeda(item.precoVenda)}
-                          readOnly
-                        />
-                      </label>
-
-                      <label>
-                        <span>Desconto</span>
-
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.desconto}
-                          onChange={(event) =>
-                            atualizarDescontoItem(
-                              item.produtoId,
-                              event.target.value,
-                            )
-                          }
-                          disabled={finalizando}
-                        />
-                      </label>
-
-                      <div className="venda-form-item-total">
-                        <span>Total</span>
-
-                        <strong>{formatarMoeda(totalItem)}</strong>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        <section className="venda-form-secao">
-          <h3>Ajustes da venda</h3>
-
-          <div className="venda-form-grid">
-            <label>
-              <span>Desconto geral</span>
-
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={desconto}
-                onChange={(event) => setDesconto(event.target.value)}
-                disabled={finalizando}
-              />
-            </label>
-
-            <label>
-              <span>Acréscimo</span>
-
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={acrescimo}
-                onChange={(event) => setAcrescimo(event.target.value)}
-                disabled={finalizando}
-              />
-            </label>
-          </div>
-        </section>
-
-        <section className="venda-form-secao">
-          <h3>Pagamento</h3>
-
-          <div className="venda-form-grid">
-            <label>
-              <span>Forma de pagamento</span>
-
+            <div className="venda-form-adicionar">
               <select
-                value={tipoPagamento}
-                onChange={(event) => {
-                  const novoTipo = event.target.value;
-
-                  setTipoPagamento(novoTipo);
-
-                  setValorRecebido("");
-
-                  setParcelas("1");
-                }}
-                disabled={finalizando}
+                value={produtoSelecionadoId}
+                onChange={(event) =>
+                  setProdutoSelecionadoId(event.target.value)
+                }
+                disabled={loadingProdutos || finalizando}
               >
-                {TIPOS_PAGAMENTO.map((tipo) => (
-                  <option key={tipo} value={tipo}>
-                    {obterNomePagamento(tipo)}
+                <option value="">
+                  {loadingProdutos
+                    ? "Carregando produtos..."
+                    : "Selecione um produto"}
+                </option>
+
+                {produtosDisponiveis.map((produto) => (
+                  <option key={produto.id} value={produto.id}>
+                    {produto.nome} — {formatarMoeda(produto.preco_venda)} —
+                    Estoque: {produto.estoque_atual} {produto.unidade}
                   </option>
                 ))}
               </select>
-            </label>
 
-            {tipoPagamento === "credito" && (
-              <label>
-                <span>Parcelas</span>
+              <button
+                type="button"
+                onClick={adicionarProduto}
+                disabled={loadingProdutos || finalizando}
+              >
+                Adicionar
+              </button>
+            </div>
 
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={parcelas}
-                  onChange={(event) => setParcelas(event.target.value)}
-                  disabled={finalizando}
-                />
-              </label>
+            {itens.length === 0 ? (
+              <div className="venda-form-vazio">Nenhum produto adicionado.</div>
+            ) : (
+              <div className="venda-form-itens">
+                {itens.map((item) => {
+                  const totalItem =
+                    Number(item.precoVenda) * Number(item.quantidade) -
+                    Number(item.desconto || 0);
+
+                  return (
+                    <article key={item.produtoId} className="venda-form-item">
+                      <div className="venda-form-item-topo">
+                        <div>
+                          <strong>{item.nome}</strong>
+
+                          <span>
+                            Estoque disponível: {item.estoqueAtual}{" "}
+                            {item.unidade}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removerItem(item.produtoId)}
+                          disabled={finalizando}
+                        >
+                          Remover
+                        </button>
+                      </div>
+
+                      <div className="venda-form-item-grid">
+                        <label>
+                          <span>Quantidade</span>
+
+                          <div className="venda-form-quantidade">
+                            <button
+                              type="button"
+                              onClick={() => diminuirQuantidade(item.produtoId)}
+                              disabled={
+                                finalizando || Number(item.quantidade) <= 1
+                              }
+                              aria-label={`Diminuir quantidade de ${item.nome}`}
+                            >
+                              −
+                            </button>
+
+                            <input
+                              type="number"
+                              min="1"
+                              step="1"
+                              value={item.quantidade}
+                              onChange={(event) =>
+                                atualizarQuantidade(
+                                  item.produtoId,
+                                  event.target.value,
+                                )
+                              }
+                              disabled={finalizando}
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => aumentarQuantidade(item.produtoId)}
+                              disabled={
+                                finalizando ||
+                                Number(item.quantidade) >=
+                                  Number(item.estoqueAtual)
+                              }
+                              aria-label={`Aumentar quantidade de ${item.nome}`}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </label>
+
+                        <label>
+                          <span>Preço</span>
+
+                          <input
+                            type="text"
+                            value={formatarMoeda(item.precoVenda)}
+                            readOnly
+                          />
+                        </label>
+
+                        <label>
+                          <span>Desconto</span>
+
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.desconto}
+                            onChange={(event) =>
+                              atualizarDescontoItem(
+                                item.produtoId,
+                                event.target.value,
+                              )
+                            }
+                            disabled={finalizando}
+                          />
+                        </label>
+
+                        <div className="venda-form-item-total">
+                          <span>Total</span>
+
+                          <strong>{formatarMoeda(totalItem)}</strong>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
             )}
+          </section>
 
-            {tipoPagamento === "dinheiro" && (
+          <section className="venda-form-secao">
+            <h3>Ajustes da venda</h3>
+
+            <div className="venda-form-grid">
               <label>
-                <span>Valor recebido</span>
+                <span>Desconto geral</span>
 
                 <input
                   type="number"
                   min="0"
                   step="0.01"
-                  value={valorRecebido}
-                  onChange={(event) => setValorRecebido(event.target.value)}
-                  placeholder={formatarMoeda(total)}
+                  value={desconto}
+                  onChange={(event) => setDesconto(event.target.value)}
                   disabled={finalizando}
                 />
               </label>
-            )}
-          </div>
-        </section>
 
-        <section className="venda-form-secao">
-          <label className="venda-form-observacoes">
-            <span>Observações</span>
+              <label>
+                <span>Acréscimo</span>
 
-            <textarea
-              value={observacoes}
-              onChange={(event) => setObservacoes(event.target.value)}
-              maxLength={1000}
-              placeholder="Informações adicionais sobre a venda."
-              disabled={finalizando}
-            />
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={acrescimo}
+                  onChange={(event) => setAcrescimo(event.target.value)}
+                  disabled={finalizando}
+                />
+              </label>
+            </div>
+          </section>
 
-            <small>
-              {observacoes.length}
-              /1000
-            </small>
-          </label>
-        </section>
+          <section className="venda-form-secao">
+            <label className="venda-form-observacoes">
+              <span>Observações</span>
 
-        <section className="venda-form-resumo">
-          <div>
-            <span>Subtotal</span>
+              <textarea
+                value={observacoes}
+                onChange={(event) => setObservacoes(event.target.value)}
+                maxLength={1000}
+                placeholder="Informações adicionais sobre a venda."
+                disabled={finalizando}
+              />
 
-            <strong>{formatarMoeda(subtotal)}</strong>
-          </div>
-
-          <div>
-            <span>Desconto</span>
-
-            <strong>- {formatarMoeda(desconto)}</strong>
-          </div>
-
-          <div>
-            <span>Acréscimo</span>
-
-            <strong>+ {formatarMoeda(acrescimo)}</strong>
-          </div>
-
-          <div className="venda-form-total">
-            <span>Total</span>
-
-            <strong>{formatarMoeda(total)}</strong>
-          </div>
-        </section>
-
-        <div className="venda-form-acoes">
-          <button
-            type="button"
-            className="venda-form-cancelar"
-            onClick={handleFechar}
-            disabled={finalizando}
-          >
-            Cancelar
-          </button>
-
-          <button
-            type="button"
-            className="venda-form-finalizar"
-            onClick={handleFinalizarVenda}
-            disabled={finalizando || itens.length === 0}
-          >
-            {finalizando
-              ? "Finalizando..."
-              : `Finalizar venda — ${formatarMoeda(total)}`}
-          </button>
+              <small>
+                {observacoes.length}
+                /1000
+              </small>
+            </label>
+          </section>
         </div>
+
+        <aside className="venda-form-caixa-resumo">
+          <section className="venda-form-secao">
+            <h3>Pagamento</h3>
+
+            <div className="venda-form-grid venda-form-grid-pagamento">
+              <label>
+                <span>Forma de pagamento</span>
+
+                <select
+                  value={tipoPagamento}
+                  onChange={(event) => {
+                    const novoTipo = event.target.value;
+
+                    setTipoPagamento(novoTipo);
+
+                    setValorRecebido("");
+
+                    setParcelas("1");
+                  }}
+                  disabled={finalizando}
+                >
+                  {TIPOS_PAGAMENTO.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {obterNomePagamento(tipo)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {tipoPagamento === "credito" && (
+                <label>
+                  <span>Parcelas</span>
+
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={parcelas}
+                    onChange={(event) => setParcelas(event.target.value)}
+                    disabled={finalizando}
+                  />
+                </label>
+              )}
+
+              {tipoPagamento === "dinheiro" && (
+                <>
+                  <label>
+                    <span>Valor recebido</span>
+
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={valorRecebido}
+                      onChange={(event) => setValorRecebido(event.target.value)}
+                      placeholder={formatarMoeda(total)}
+                      disabled={finalizando}
+                    />
+                  </label>
+
+                  <div className="venda-form-troco">
+                    <span>Troco</span>
+
+                    <strong>{formatarMoeda(troco)}</strong>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
+          <section className="venda-form-resumo">
+            <div>
+              <span>Subtotal</span>
+
+              <strong>{formatarMoeda(subtotal)}</strong>
+            </div>
+
+            <div>
+              <span>Desconto</span>
+
+              <strong>- {formatarMoeda(desconto)}</strong>
+            </div>
+
+            <div>
+              <span>Acréscimo</span>
+
+              <strong>+ {formatarMoeda(acrescimo)}</strong>
+            </div>
+
+            <div className="venda-form-total">
+              <span>Total</span>
+
+              <strong>{formatarMoeda(total)}</strong>
+            </div>
+          </section>
+
+          <div className="venda-form-acoes">
+            <button
+              type="button"
+              className="venda-form-cancelar"
+              onClick={handleCancelar}
+              disabled={finalizando}
+            >
+              Limpar venda
+            </button>
+
+            <button
+              type="button"
+              className="venda-form-finalizar"
+              onClick={handleFinalizarVenda}
+              disabled={finalizando || itens.length === 0}
+            >
+              {finalizando
+                ? "Finalizando..."
+                : `Finalizar venda — ${formatarMoeda(total)}`}
+            </button>
+          </div>
+        </aside>
       </div>
+    </div>
+  );
+
+  if (embutido) {
+    return conteudo;
+  }
+
+  return (
+    <Modal aberto={aberto} titulo="Nova venda" onFechar={handleCancelar}>
+      {conteudo}
     </Modal>
   );
 }

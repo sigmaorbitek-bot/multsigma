@@ -10,6 +10,13 @@ import StatCard from "../../components/StatCard/StatCard";
 
 import "./Dashboard.css";
 
+function formatarMoeda(valor) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(Number(valor) || 0);
+}
+
 function Dashboard() {
   const { empresa } = useAuth();
 
@@ -17,6 +24,10 @@ function Dashboard() {
     produtosCadastrados: 0,
     produtosAtivos: 0,
     estoqueBaixo: 0,
+
+    vendasHoje: 0,
+    faturamentoHoje: 0,
+    lucroMes: 0,
   });
 
   const [empresaDadosId, setEmpresaDadosId] = useState(null);
@@ -77,6 +88,10 @@ function Dashboard() {
         produtosCadastrados: 0,
         produtosAtivos: 0,
         estoqueBaixo: 0,
+
+        vendasHoje: 0,
+        faturamentoHoje: 0,
+        lucroMes: 0,
       };
 
   const empresaSemProdutos =
@@ -135,35 +150,23 @@ function Dashboard() {
       )}
 
       <div className="dashboard-cards">
-        <div className="dashboard-card-em-breve">
-          <span className="dashboard-badge-em-breve">Em breve</span>
+        <StatCard
+          titulo="Faturamento hoje"
+          valor={loading ? "..." : formatarMoeda(resumoAtual.faturamentoHoje)}
+          descricao="Total vendido hoje"
+        />
 
-          <StatCard
-            titulo="Faturamento hoje"
-            valor="—"
-            descricao="Total vendido hoje"
-          />
-        </div>
+        <StatCard
+          titulo="Vendas hoje"
+          valor={loading ? "..." : resumoAtual.vendasHoje}
+          descricao="Vendas concluídas hoje"
+        />
 
-        <div className="dashboard-card-em-breve">
-          <span className="dashboard-badge-em-breve">Em breve</span>
-
-          <StatCard
-            titulo="Vendas hoje"
-            valor="—"
-            descricao="Vendas realizadas"
-          />
-        </div>
-
-        <div className="dashboard-card-em-breve">
-          <span className="dashboard-badge-em-breve">Em breve</span>
-
-          <StatCard
-            titulo="Lucro do mês"
-            valor="—"
-            descricao="Resultado estimado no mês"
-          />
-        </div>
+        <StatCard
+          titulo="Lucro do mês"
+          valor={loading ? "..." : formatarMoeda(resumoAtual.lucroMes)}
+          descricao="Lucro das vendas concluídas no mês"
+        />
 
         <StatCard
           titulo="Estoque baixo"
@@ -195,18 +198,6 @@ function Dashboard() {
 
         <div className="dashboard-modulos-grid">
           <article className="dashboard-modulo-card">
-            <div className="dashboard-modulo-icone">🛒</div>
-
-            <div>
-              <strong>Vendas</strong>
-
-              <p>Registre vendas e acompanhe resultados.</p>
-            </div>
-
-            <span>Em breve</span>
-          </article>
-
-          <article className="dashboard-modulo-card">
             <div className="dashboard-modulo-icone">🧾</div>
 
             <div>
@@ -219,12 +210,24 @@ function Dashboard() {
           </article>
 
           <article className="dashboard-modulo-card">
+            <div className="dashboard-modulo-icone">👥</div>
+
+            <div>
+              <strong>Clientes</strong>
+
+              <p>Centralize informações e histórico dos seus clientes.</p>
+            </div>
+
+            <span>Em breve</span>
+          </article>
+
+          <article className="dashboard-modulo-card">
             <div className="dashboard-modulo-icone">💰</div>
 
             <div>
               <strong>Financeiro</strong>
 
-              <p>Acompanhe faturamento, custos e lucro.</p>
+              <p>Acompanhe receitas, despesas e resultados financeiros.</p>
             </div>
 
             <span>Em breve</span>
