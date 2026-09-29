@@ -68,9 +68,7 @@ function prepararItens(itens) {
 
     return {
       produto_id: item.produtoId,
-
       quantidade,
-
       desconto,
     };
   });
@@ -164,13 +162,9 @@ export async function finalizarVenda({
   validarEmpresaId(empresaId);
 
   const itensPreparados = prepararItens(itens);
-
   const pagamentosPreparados = prepararPagamentos(pagamentos);
-
   const descontoNumero = converterNumeroNaoNegativo(desconto, "Desconto");
-
   const acrescimoNumero = converterNumeroNaoNegativo(acrescimo, "Acréscimo");
-
   const observacoesLimpas = observacoes?.trim() || null;
 
   if (observacoesLimpas && observacoesLimpas.length > 1000) {
@@ -179,16 +173,47 @@ export async function finalizarVenda({
 
   const { data, error } = await supabase.rpc("finalizar_venda", {
     p_empresa_id: empresaId,
-
     p_itens: itensPreparados,
-
     p_pagamentos: pagamentosPreparados,
-
     p_desconto: descontoNumero,
-
     p_acrescimo: acrescimoNumero,
-
     p_observacoes: observacoesLimpas,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function cancelarVenda({
+  empresaId,
+  vendaId,
+  motivo,
+}) {
+  validarEmpresaId(empresaId);
+
+  if (!vendaId) {
+    throw new Error("Venda não informada.");
+  }
+
+  const motivoLimpo = motivo?.trim() || "";
+
+  if (motivoLimpo.length < 3) {
+    throw new Error("Informe o motivo do cancelamento.");
+  }
+
+  if (motivoLimpo.length > 500) {
+    throw new Error(
+      "O motivo do cancelamento pode possuir no máximo 500 caracteres.",
+    );
+  }
+
+  const { data, error } = await supabase.rpc("cancelar_venda", {
+    p_empresa_id: empresaId,
+    p_venda_id: vendaId,
+    p_motivo: motivoLimpo,
   });
 
   if (error) {
@@ -219,6 +244,9 @@ export async function listarVendas(empresaId, limite = 100) {
         forma_pagamento,
         status,
         observacoes,
+        motivo_cancelamento,
+        cancelada_em,
+        cancelada_por,
         created_at,
         updated_at
       `,
@@ -258,6 +286,9 @@ export async function obterVenda({ empresaId, vendaId }) {
         forma_pagamento,
         status,
         observacoes,
+        motivo_cancelamento,
+        cancelada_em,
+        cancelada_por,
         created_at,
         updated_at
       `,
@@ -320,9 +351,7 @@ export async function obterVenda({ empresaId, vendaId }) {
 
   return {
     ...venda,
-
     itens: itensResult.data ?? [],
-
     pagamentos: pagamentosResult.data ?? [],
   };
 }

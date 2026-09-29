@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Produtos from "./pages/Produtos/Produtos";
 import Estoque from "./pages/Estoque/Estoque";
 import Vendas from "./pages/Vendas/Vendas";
+import Relatorios from "./pages/Relatorios/Relatorios";
 
 import DashboardLayout from "./layouts/DashboardLayout";
 
@@ -47,6 +48,8 @@ function App() {
           <Route path="estoque" element={<Estoque />} />
 
           <Route path="vendas" element={<Vendas />} />
+
+          <Route path="relatorios" element={<Relatorios />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

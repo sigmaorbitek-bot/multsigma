@@ -1,12 +1,16 @@
 .vendas-page {
   display: flex;
+
   flex-direction: column;
+
   gap: 24px;
 }
 
 .vendas-page-header {
   display: flex;
+
   align-items: flex-start;
+
   justify-content: space-between;
 
   gap: 20px;
@@ -20,9 +24,11 @@
   color: var(--cor-primaria);
 
   font-size: 10px;
+
   font-weight: 800;
 
   text-transform: uppercase;
+
   letter-spacing: 0.08em;
 }
 
@@ -32,7 +38,9 @@
   color: var(--cor-texto);
 
   font-size: 30px;
+
   font-weight: 800;
+
   line-height: 1.15;
 }
 
@@ -42,6 +50,7 @@
   color: var(--cor-texto-secundario);
 
   font-size: 14px;
+
   line-height: 1.5;
 }
 
@@ -53,14 +62,17 @@
   border-radius: var(--raio-pequeno);
 
   background: var(--cor-perigo-fundo);
+
   color: var(--cor-perigo);
 
   font-size: 13px;
+
   line-height: 1.5;
 }
 
 .vendas-abas {
   display: inline-flex;
+
   align-self: flex-start;
 
   gap: 6px;
@@ -68,9 +80,11 @@
   padding: 5px;
 
   border: 1px solid var(--cor-borda);
+
   border-radius: var(--raio-medio);
 
   background: var(--cor-superficie);
+
   box-shadow: var(--sombra-suave);
 }
 
@@ -78,7 +92,9 @@
   min-height: 40px;
 
   display: inline-flex;
+
   align-items: center;
+
   justify-content: center;
 
   gap: 8px;
@@ -86,13 +102,17 @@
   padding: 8px 16px;
 
   border: 1px solid transparent;
+
   border-radius: var(--raio-pequeno);
 
   background: transparent;
+
   color: var(--cor-texto-secundario);
 
   font: inherit;
+
   font-size: 13px;
+
   font-weight: 700;
 
   cursor: pointer;
@@ -106,6 +126,7 @@
 
 .vendas-aba:hover {
   background: var(--cor-superficie-secundaria);
+
   color: var(--cor-texto);
 }
 
@@ -120,7 +141,9 @@
 .vendas-aba-ativa:hover {
   background: color-mix(
     in srgb,
+
     var(--cor-primaria) 11%,
+
     var(--cor-superficie)
   );
 
@@ -129,6 +152,7 @@
 
 .vendas-aba:focus-visible {
   outline: 2px solid var(--cor-primaria);
+
   outline-offset: 2px;
 }
 
@@ -138,6 +162,7 @@
 
 .vendas-resumo {
   display: grid;
+
   grid-template-columns: repeat(3, minmax(0, 1fr));
 
   gap: 16px;
@@ -147,6 +172,7 @@
   min-width: 0;
 
   display: flex;
+
   flex-direction: column;
 
   gap: 10px;
@@ -154,6 +180,7 @@
   padding: 20px;
 
   border: 1px solid var(--cor-borda);
+
   border-radius: var(--raio-medio);
 
   background: var(--cor-superficie);
@@ -165,6 +192,7 @@
   color: var(--cor-texto-secundario);
 
   font-size: 12px;
+
   font-weight: 700;
 }
 
@@ -174,10 +202,13 @@
   color: var(--cor-texto);
 
   font-size: 24px;
+
   font-weight: 800;
+
   line-height: 1.2;
 
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
@@ -185,6 +216,7 @@
   color: var(--cor-texto-secundario);
 
   font-size: 12px;
+
   line-height: 1.4;
 }
 
@@ -192,6 +224,7 @@
   min-width: 0;
 
   display: flex;
+
   flex-direction: column;
 
   gap: 16px;
@@ -199,7 +232,9 @@
 
 .vendas-historico-header {
   display: flex;
+
   align-items: flex-end;
+
   justify-content: space-between;
 
   gap: 16px;
@@ -211,6 +246,7 @@
   color: var(--cor-texto);
 
   font-size: 20px;
+
   font-weight: 800;
 }
 
@@ -228,12 +264,15 @@
   padding: 6px 10px;
 
   border: 1px solid var(--cor-borda);
+
   border-radius: 999px;
 
   background: var(--cor-superficie);
+
   color: var(--cor-texto-secundario);
 
   font-size: 11px;
+
   font-weight: 700;
 }
 
@@ -242,15 +281,19 @@
   min-height: 220px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   padding: 28px;
 
   border: 1px solid var(--cor-borda);
+
   border-radius: var(--raio-medio);
 
   background: var(--cor-superficie);
+
   color: var(--cor-texto-secundario);
 
   box-shadow: var(--sombra-suave);
@@ -266,10 +309,13 @@
 
 .vendas-vazio-icone {
   width: 54px;
+
   height: 54px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   border-radius: 14px;
@@ -283,6 +329,7 @@
   color: var(--cor-texto);
 
   font-size: 15px;
+
   font-weight: 800;
 }
 
@@ -294,75 +341,15 @@
   color: var(--cor-texto-secundario);
 
   font-size: 13px;
+
   line-height: 1.5;
-}
-
-.vendas-tabela-wrapper {
-  min-width: 0;
-
-  overflow-x: auto;
-
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-medio);
-
-  background: var(--cor-superficie);
-
-  box-shadow: var(--sombra-suave);
-}
-
-.vendas-tabela {
-  width: 100%;
-  min-width: 860px;
-
-  border-collapse: collapse;
-}
-
-.vendas-tabela th,
-.vendas-tabela td {
-  padding: 14px 16px;
-
-  border-bottom: 1px solid var(--cor-borda);
-
-  text-align: left;
-  vertical-align: middle;
-}
-
-.vendas-tabela th {
-  background: var(--cor-superficie-secundaria);
-  color: var(--cor-texto-secundario);
-
-  font-size: 10px;
-  font-weight: 800;
-
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.vendas-tabela td {
-  color: var(--cor-texto);
-
-  font-size: 13px;
-}
-
-.vendas-tabela tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.vendas-tabela tbody tr {
-  transition: background 0.2s ease;
-}
-
-.vendas-tabela tbody tr:hover {
-  background: var(--cor-superficie-secundaria);
-}
-
-.vendas-tabela td strong {
-  font-weight: 800;
 }
 
 .vendas-status {
   display: inline-flex;
+
   align-items: center;
+
   justify-content: center;
 
   padding: 4px 8px;
@@ -370,9 +357,11 @@
   border-radius: 999px;
 
   background: var(--cor-superficie-secundaria);
+
   color: var(--cor-texto-secundario);
 
   font-size: 10px;
+
   font-weight: 800;
 }
 
@@ -396,13 +385,17 @@
   padding: 7px 11px;
 
   border: 1px solid var(--cor-borda);
+
   border-radius: var(--raio-pequeno);
 
   background: var(--cor-superficie);
+
   color: var(--cor-texto-secundario);
 
   font: inherit;
+
   font-size: 11px;
+
   font-weight: 700;
 
   transition:
@@ -432,6 +425,7 @@
 
 .vendas-detalhes:focus-visible {
   outline: 2px solid var(--cor-primaria);
+
   outline-offset: 2px;
 }
 
@@ -448,6 +442,7 @@
 
   .vendas-page-header {
     flex-direction: column;
+
     align-items: stretch;
   }
 
@@ -455,6 +450,7 @@
     width: 100%;
 
     display: grid;
+
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -483,4 +479,556 @@
   .vendas-contador {
     align-self: flex-start;
   }
+}
+
+.vendas-sucesso {
+  max-width: 680px;
+
+  width: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 0 auto;
+
+  padding: 36px;
+
+  border: 1px solid var(--cor-borda);
+
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  box-shadow: var(--sombra-suave);
+
+  text-align: center;
+}
+
+.vendas-sucesso-icone {
+  width: 68px;
+
+  height: 68px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: color-mix(in srgb, var(--cor-sucesso) 12%, var(--cor-superficie));
+
+  color: var(--cor-sucesso);
+
+  font-size: 32px;
+
+  font-weight: 900;
+}
+
+.vendas-sucesso-etiqueta {
+  margin-top: 4px;
+
+  color: var(--cor-sucesso);
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+}
+
+.vendas-sucesso h2 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 24px;
+
+  font-weight: 800;
+}
+
+.vendas-sucesso > p {
+  max-width: 480px;
+
+  margin: 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+.vendas-sucesso-resumo {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+.vendas-sucesso-resumo > div {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding: 14px;
+
+  border: 1px solid var(--cor-borda);
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.vendas-sucesso-resumo span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.vendas-sucesso-resumo strong {
+  color: var(--cor-texto);
+
+  font-size: 16px;
+
+  font-weight: 800;
+}
+
+.vendas-sucesso-resumo .vendas-sucesso-troco {
+  color: var(--cor-sucesso);
+}
+
+.vendas-sucesso-acoes {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 12px;
+}
+
+.vendas-sucesso-acoes button {
+  min-height: 44px;
+
+  padding: 10px 14px;
+
+  border-radius: var(--raio-pequeno);
+
+  font: inherit;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.vendas-sucesso-comprovante {
+  border: 1px solid var(--cor-primaria);
+
+  background: var(--cor-primaria);
+
+  color: var(--cor-texto-claro);
+}
+
+.vendas-sucesso-comprovante:hover {
+  transform: translateY(-1px);
+
+  background: var(--cor-primaria-hover);
+
+  border-color: var(--cor-primaria-hover);
+}
+
+.vendas-sucesso-nova,
+.vendas-sucesso-historico {
+  border: 1px solid var(--cor-borda);
+
+  background: var(--cor-superficie);
+
+  color: var(--cor-texto);
+}
+
+.vendas-sucesso-nova:hover,
+.vendas-sucesso-historico:hover {
+  border-color: var(--cor-borda-forte);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.vendas-sucesso-acoes button:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .vendas-sucesso {
+    padding: 24px 18px;
+  }
+
+  .vendas-sucesso-resumo {
+    grid-template-columns: 1fr;
+  }
+
+  .vendas-sucesso-acoes {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vendas-historico-lista {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+.vendas-historico-card {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 16px;
+
+  padding: 18px;
+
+  border: 1px solid var(--cor-borda);
+
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie);
+
+  box-shadow: var(--sombra-suave);
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.vendas-historico-card:hover {
+  transform: translateY(-2px);
+
+  border-color: var(--cor-borda-forte);
+}
+
+.vendas-historico-card-cancelada {
+  border-color: color-mix(in srgb, var(--cor-perigo) 20%, var(--cor-borda));
+
+  background: color-mix(in srgb, var(--cor-perigo) 2%, var(--cor-superficie));
+}
+
+.vendas-historico-card-topo {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 14px;
+}
+
+.vendas-historico-card-data {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.vendas-historico-card-data > span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.04em;
+}
+
+.vendas-historico-card-data > strong {
+  color: var(--cor-texto);
+
+  font-size: 14px;
+
+  font-weight: 800;
+}
+
+.vendas-historico-card-dados {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 10px;
+
+  padding: 14px;
+
+  border: 1px solid var(--cor-borda);
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.vendas-historico-card-dado {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.vendas-historico-card-dado > span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+
+  font-weight: 700;
+}
+
+.vendas-historico-card-dado > strong {
+  overflow: hidden;
+
+  color: var(--cor-texto);
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.vendas-historico-card-dado > .vendas-historico-card-total {
+  color: var(--cor-primaria);
+
+  font-size: 15px;
+}
+
+.vendas-historico-cancelamento {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding: 11px 12px;
+
+  border: 1px solid color-mix(in srgb, var(--cor-perigo) 18%, var(--cor-borda));
+
+  border-radius: var(--raio-pequeno);
+
+  background: color-mix(in srgb, var(--cor-perigo) 5%, var(--cor-superficie));
+}
+
+.vendas-historico-cancelamento > span {
+  color: var(--cor-perigo);
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.vendas-historico-cancelamento > p {
+  margin: 0;
+
+  overflow: hidden;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+
+  line-height: 1.5;
+
+  display: -webkit-box;
+
+  line-clamp: 2;
+
+  -webkit-line-clamp: 2;
+
+  -webkit-box-orient: vertical;
+}
+
+.vendas-historico-card-rodape {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-top: auto;
+
+  padding-top: 12px;
+
+  border-top: 1px solid var(--cor-borda);
+}
+
+.vendas-historico-card-id {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 9px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.vendas-historico-card-rodape .vendas-detalhes {
+  flex-shrink: 0;
+
+  min-height: 36px;
+
+  padding: 7px 12px;
+
+  border-color: color-mix(in srgb, var(--cor-primaria) 20%, var(--cor-borda));
+
+  background: color-mix(in srgb, var(--cor-primaria) 5%, var(--cor-superficie));
+
+  color: var(--cor-primaria);
+}
+
+.vendas-historico-card-rodape .vendas-detalhes:hover {
+  border-color: var(--cor-primaria);
+
+  background: color-mix(
+    in srgb,
+
+    var(--cor-primaria) 10%,
+
+    var(--cor-superficie)
+  );
+}
+
+@media (max-width: 700px) {
+  .vendas-historico-lista {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .vendas-historico-card {
+    padding: 15px;
+  }
+
+  .vendas-historico-card-dados {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vendas-historico-card-dado:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .vendas-historico-card-rodape {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .vendas-historico-card-id {
+    max-width: 100%;
+  }
+
+  .vendas-historico-card-rodape .vendas-detalhes {
+    width: 100%;
+  }
+}
+
+.vendas-historico-acoes {
+  display: flex;
+
+  justify-content: center;
+
+  margin-top: 4px;
+}
+
+.vendas-historico-ver-mais {
+  min-height: 42px;
+
+  padding: 10px 18px;
+
+  border: 1px solid var(--cor-borda);
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie);
+
+  color: var(--cor-texto);
+
+  font: inherit;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.vendas-historico-ver-mais:hover {
+  transform: translateY(-1px);
+
+  border-color: var(--cor-primaria);
+
+  background: color-mix(
+    in srgb,
+
+    var(--cor-primaria) 6%,
+
+    var(--cor-superficie)
+  );
+
+  color: var(--cor-primaria);
+}
+
+.vendas-historico-ver-mais:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+
+  outline-offset: 2px;
 }

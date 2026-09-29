@@ -1,0 +1,628 @@
+.venda-detalhes {
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.venda-detalhes-estado,
+.venda-detalhes-erro {
+  padding: 24px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie-secundaria);
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+.venda-detalhes-erro {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--cor-perigo) 25%,
+      var(--cor-borda)
+    );
+
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo);
+}
+
+.venda-detalhes-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.venda-detalhes-topo > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.venda-detalhes-topo > div > span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.venda-detalhes-topo strong {
+  color: var(--cor-texto);
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.venda-detalhes-topo small {
+  overflow: hidden;
+
+  max-width: 420px;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+
+  text-overflow: ellipsis;
+}
+
+.venda-detalhes-status {
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  background: var(--cor-superficie-secundaria);
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.venda-detalhes-status-concluida,
+.venda-detalhes-status-concluido {
+  background:
+    color-mix(
+      in srgb,
+      var(--cor-sucesso) 12%,
+      var(--cor-superficie)
+    );
+
+  color: var(--cor-sucesso);
+}
+
+.venda-detalhes-status-cancelada,
+.venda-detalhes-status-cancelado {
+  background:
+    color-mix(
+      in srgb,
+      var(--cor-perigo) 10%,
+      var(--cor-superficie)
+    );
+
+  color: var(--cor-perigo);
+}
+
+.venda-detalhes-secao {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.venda-detalhes-secao-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.venda-detalhes-secao-header h3 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.venda-detalhes-secao-header span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.venda-detalhes-itens,
+.venda-detalhes-pagamentos {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.venda-detalhes-item {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie);
+}
+
+.venda-detalhes-item-nome strong {
+  color: var(--cor-texto);
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.venda-detalhes-item-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.venda-detalhes-item-grid > div,
+.venda-detalhes-pagamento > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.venda-detalhes-item-grid span,
+.venda-detalhes-pagamento span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.venda-detalhes-item-grid strong,
+.venda-detalhes-pagamento strong {
+  color: var(--cor-texto);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.venda-detalhes-pagamento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.venda-detalhes-pagamento .venda-detalhes-troco {
+  color: var(--cor-sucesso);
+}
+
+.venda-detalhes-resumo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  padding: 16px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.venda-detalhes-resumo > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.venda-detalhes-resumo span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+}
+
+.venda-detalhes-resumo strong {
+  color: var(--cor-texto);
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.venda-detalhes-total {
+  margin-top: 4px;
+  padding-top: 12px;
+
+  border-top: 1px solid var(--cor-borda);
+}
+
+.venda-detalhes-total span {
+  color: var(--cor-texto);
+
+  font-weight: 800;
+}
+
+.venda-detalhes-total strong {
+  color: var(--cor-primaria);
+
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.venda-detalhes-observacoes {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  padding: 14px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie-secundaria);
+}
+
+.venda-detalhes-observacoes span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.venda-detalhes-observacoes p {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  white-space: pre-wrap;
+}
+
+.venda-detalhes-acoes {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.venda-detalhes-acoes button {
+  min-height: 42px;
+
+  padding: 9px 15px;
+
+  border-radius: var(--raio-pequeno);
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.venda-detalhes-fechar {
+  border: 1px solid var(--cor-borda);
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+.venda-detalhes-imprimir {
+  border: 1px solid var(--cor-primaria);
+
+  background: var(--cor-primaria);
+  color: var(--cor-texto-claro);
+}
+
+.venda-detalhes-imprimir:hover {
+  background: var(--cor-primaria-hover);
+  border-color: var(--cor-primaria-hover);
+}
+
+.venda-detalhes-acoes button:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .venda-detalhes-item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .venda-detalhes-pagamento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .venda-detalhes-acoes {
+    flex-direction: column-reverse;
+  }
+
+  .venda-detalhes-acoes button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .venda-detalhes-topo {
+    flex-direction: column;
+  }
+
+  .venda-detalhes-item-grid,
+  .venda-detalhes-pagamento {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.venda-detalhes-cancelada {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 14px;
+
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--cor-perigo) 24%,
+      var(--cor-borda)
+    );
+  border-radius: var(--raio-pequeno);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--cor-perigo) 6%,
+      var(--cor-superficie)
+    );
+}
+
+.venda-detalhes-cancelada > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.venda-detalhes-cancelada span {
+  color: var(--cor-perigo);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.venda-detalhes-cancelada strong {
+  color: var(--cor-texto);
+
+  font-size: 11px;
+}
+
+.venda-detalhes-cancelada p {
+  margin: 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.venda-detalhes-confirmar-cancelamento {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  padding: 16px;
+
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--cor-perigo) 28%,
+      var(--cor-borda)
+    );
+  border-radius: var(--raio-medio);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--cor-perigo) 5%,
+      var(--cor-superficie)
+    );
+}
+
+.venda-detalhes-confirmar-cancelamento h3 {
+  margin: 0;
+
+  color: var(--cor-texto);
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.venda-detalhes-confirmar-cancelamento p {
+  margin: 5px 0 0;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.venda-detalhes-confirmar-cancelamento label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.venda-detalhes-confirmar-cancelamento label > span {
+  color: var(--cor-texto-secundario);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.venda-detalhes-confirmar-cancelamento textarea {
+  width: 100%;
+  min-height: 90px;
+
+  padding: 10px 11px;
+
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+
+  font: inherit;
+  font-size: 12px;
+
+  resize: vertical;
+}
+
+.venda-detalhes-confirmar-cancelamento textarea:focus {
+  outline: none;
+
+  border-color: var(--cor-perigo);
+
+  box-shadow:
+    0 0 0 3px
+      color-mix(
+        in srgb,
+        var(--cor-perigo) 10%,
+        transparent
+      );
+}
+
+.venda-detalhes-confirmar-cancelamento small {
+  align-self: flex-end;
+
+  color: var(--cor-texto-secundario);
+
+  font-size: 10px;
+}
+
+.venda-detalhes-cancelamento-erro {
+  padding: 10px 12px;
+
+  border-radius: var(--raio-pequeno);
+
+  background: var(--cor-perigo-fundo);
+  color: var(--cor-perigo);
+
+  font-size: 12px;
+}
+
+.venda-detalhes-confirmar-acoes {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.venda-detalhes-desistir,
+.venda-detalhes-confirmar,
+.venda-detalhes-cancelar-venda {
+  min-height: 42px;
+
+  padding: 9px 15px;
+
+  border-radius: var(--raio-pequeno);
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.venda-detalhes-desistir {
+  border: 1px solid var(--cor-borda);
+
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+.venda-detalhes-confirmar,
+.venda-detalhes-cancelar-venda {
+  border: 1px solid var(--cor-perigo);
+
+  background: var(--cor-perigo);
+  color: var(--cor-texto-claro);
+}
+
+.venda-detalhes-confirmar:disabled,
+.venda-detalhes-desistir:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.6;
+}
+
+.venda-detalhes-cancelar-venda {
+  margin-right: auto;
+}
+
+.venda-detalhes-cancelar-venda:hover,
+.venda-detalhes-confirmar:hover:not(:disabled) {
+  filter: brightness(0.96);
+}
+
+@media (max-width: 600px) {
+  .venda-detalhes-confirmar-acoes {
+    flex-direction: column-reverse;
+  }
+
+  .venda-detalhes-confirmar-acoes button,
+  .venda-detalhes-cancelar-venda {
+    width: 100%;
+  }
+
+  .venda-detalhes-cancelar-venda {
+    margin-right: 0;
+  }
+}

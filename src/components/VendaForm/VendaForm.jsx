@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import Modal from "../Modal/Modal";
-
 import { listarProdutos } from "../../services/produtos";
-
-import { finalizarVenda, TIPOS_PAGAMENTO } from "../../services/vendas";
+import {
+  finalizarVenda,
+  TIPOS_PAGAMENTO,
+} from "../../services/vendas";
 
 import "./VendaForm.css";
 
@@ -28,6 +29,16 @@ function obterNomePagamento(tipo) {
   return nomes[tipo] || tipo;
 }
 
+function unidadeExigeQuantidadeInteira(unidade) {
+  return ["UN", "CX", "PCT"].includes(
+    String(unidade ?? "").trim().toUpperCase(),
+  );
+}
+
+function obterPassoQuantidade(unidade) {
+  return unidadeExigeQuantidadeInteira(unidade) ? 1 : 0.001;
+}
+
 function VendaForm({
   aberto = false,
   modo = "modal",
@@ -36,33 +47,20 @@ function VendaForm({
   onVendaFinalizada,
 }) {
   const embutido = modo === "embutido";
-
   const ativo = embutido || aberto;
 
   const [produtos, setProdutos] = useState([]);
-
   const [produtoSelecionadoId, setProdutoSelecionadoId] = useState("");
-
   const [itens, setItens] = useState([]);
-
   const [desconto, setDesconto] = useState("0");
-
   const [acrescimo, setAcrescimo] = useState("0");
-
   const [tipoPagamento, setTipoPagamento] = useState("pix");
-
   const [valorRecebido, setValorRecebido] = useState("");
-
   const [parcelas, setParcelas] = useState("1");
-
   const [observacoes, setObservacoes] = useState("");
-
   const [empresaProdutosId, setEmpresaProdutosId] = useState(null);
-
   const [empresaConsultadaId, setEmpresaConsultadaId] = useState(null);
-
   const [finalizando, setFinalizando] = useState(false);
-
   const [erro, setErro] = useState("");
 
   useEffect(() => {
@@ -74,34 +72,24 @@ function VendaForm({
 
     listarProdutos(empresaId)
       .then((dados) => {
-        if (cancelado) {
-          return;
-        }
+        if (cancelado) return;
 
         const ativos = (dados ?? []).filter(
           (produto) => produto.ativo === true,
         );
 
         setProdutos(ativos);
-
         setEmpresaProdutosId(empresaId);
-
         setErro("");
       })
       .catch((error) => {
-        if (cancelado) {
-          return;
-        }
+        if (cancelado) return;
 
         console.error("Erro ao carregar produtos para venda:", error);
-
         setErro("Não foi possível carregar os produtos.");
       })
       .finally(() => {
-        if (cancelado) {
-          return;
-        }
-
+        if (cancelado) return;
         setEmpresaConsultadaId(empresaId);
       });
 
@@ -136,18 +124,38 @@ function VendaForm({
     );
   }, [subtotal, desconto, acrescimo]);
 
-  const troco = useMemo(() => {
-    if (tipoPagamento !== "dinheiro") {
-      return 0;
+  const resumoDinheiro = useMemo(() => {
+    if (tipoPagamento !== "dinheiro" || valorRecebido === "") {
+      return {
+        recebido: 0,
+        faltante: total,
+        troco: 0,
+        suficiente: false,
+        informado: false,
+      };
     }
 
-    const recebido = Number(valorRecebido || 0);
+    const recebido = Number(valorRecebido);
 
-    if (!Number.isFinite(recebido)) {
-      return 0;
+    if (!Number.isFinite(recebido) || recebido < 0) {
+      return {
+        recebido: 0,
+        faltante: total,
+        troco: 0,
+        suficiente: false,
+        informado: false,
+      };
     }
 
-    return Math.max(0, recebido - total);
+    const diferenca = recebido - total;
+
+    return {
+      recebido,
+      faltante: diferenca < 0 ? Math.abs(diferenca) : 0,
+      troco: diferenca > 0 ? diferenca : 0,
+      suficiente: recebido >= total,
+      informado: true,
+    };
   }, [tipoPagamento, valorRecebido, total]);
 
   function adicionarProduto() {
@@ -155,7 +163,6 @@ function VendaForm({
 
     if (!produtoSelecionadoId) {
       setErro("Selecione um produto.");
-
       return;
     }
 
@@ -165,19 +172,16 @@ function VendaForm({
 
     if (!produto) {
       setErro("Produto não encontrado.");
-
       return;
     }
 
     if (itens.some((item) => item.produtoId === produto.id)) {
       setErro("Esse produto já foi adicionado à venda.");
-
       return;
     }
 
     if (Number(produto.estoque_atual) <= 0) {
       setErro("Esse produto está sem estoque.");
-
       return;
     }
 
@@ -185,17 +189,11 @@ function VendaForm({
       ...atuais,
       {
         produtoId: produto.id,
-
         nome: produto.nome,
-
         unidade: produto.unidade,
-
         quantidade: 1,
-
         precoVenda: Number(produto.preco_venda),
-
         desconto: 0,
-
         estoqueAtual: Number(produto.estoque_atual),
       },
     ]);
@@ -209,10 +207,7 @@ function VendaForm({
     setItens((atuais) =>
       atuais.map((item) =>
         item.produtoId === produtoId
-          ? {
-              ...item,
-              quantidade,
-            }
+          ? { ...item, quantidade }
           : item,
       ),
     );
@@ -225,13 +220,15 @@ function VendaForm({
           return item;
         }
 
-        const quantidadeAtual = Number(item.quantidade) || 0;
-
-        const novaQuantidade = Math.max(1, quantidadeAtual - 1);
+        const passo = obterPassoQuantidade(item.unidade);
+        const quantidadeAtual = Number(item.quantidade) || passo;
 
         return {
           ...item,
-          quantidade: novaQuantidade,
+          quantidade: Math.max(
+            passo,
+            Number((quantidadeAtual - passo).toFixed(3)),
+          ),
         };
       }),
     );
@@ -244,13 +241,15 @@ function VendaForm({
           return item;
         }
 
+        const passo = obterPassoQuantidade(item.unidade);
         const quantidadeAtual = Number(item.quantidade) || 0;
-
-        const novaQuantidade = Math.min(item.estoqueAtual, quantidadeAtual + 1);
 
         return {
           ...item,
-          quantidade: novaQuantidade,
+          quantidade: Math.min(
+            Number(item.estoqueAtual),
+            Number((quantidadeAtual + passo).toFixed(3)),
+          ),
         };
       }),
     );
@@ -262,42 +261,32 @@ function VendaForm({
     setItens((atuais) =>
       atuais.map((item) =>
         item.produtoId === produtoId
-          ? {
-              ...item,
-              desconto: descontoItem,
-            }
+          ? { ...item, desconto: descontoItem }
           : item,
       ),
     );
   }
 
   function removerItem(produtoId) {
-    setItens((atuais) => atuais.filter((item) => item.produtoId !== produtoId));
+    setItens((atuais) =>
+      atuais.filter((item) => item.produtoId !== produtoId),
+    );
   }
 
   function limparFormulario() {
     setProdutoSelecionadoId("");
-
     setItens([]);
-
     setDesconto("0");
     setAcrescimo("0");
-
     setTipoPagamento("pix");
-
     setValorRecebido("");
-
     setParcelas("1");
-
     setObservacoes("");
-
     setErro("");
   }
 
   function handleCancelar() {
-    if (finalizando) {
-      return;
-    }
+    if (finalizando) return;
 
     limparFormulario();
 
@@ -307,15 +296,12 @@ function VendaForm({
   }
 
   async function handleFinalizarVenda() {
-    if (finalizando) {
-      return;
-    }
+    if (finalizando) return;
 
     setErro("");
 
     if (itens.length === 0) {
       setErro("Adicione pelo menos um produto à venda.");
-
       return;
     }
 
@@ -324,23 +310,29 @@ function VendaForm({
 
       if (!Number.isFinite(quantidade) || quantidade <= 0) {
         setErro(`Informe uma quantidade válida para ${item.nome}.`);
+        return;
+      }
 
+      if (
+        unidadeExigeQuantidadeInteira(item.unidade) &&
+        !Number.isInteger(quantidade)
+      ) {
+        setErro(
+          `${item.nome} usa ${item.unidade} e precisa de quantidade inteira.`,
+        );
         return;
       }
 
       if (quantidade > Number(item.estoqueAtual)) {
         setErro(`Estoque insuficiente para ${item.nome}.`);
-
         return;
       }
 
       const valorBruto = Number(item.precoVenda) * quantidade;
-
       const descontoItem = Number(item.desconto || 0);
 
       if (!Number.isFinite(descontoItem) || descontoItem < 0) {
         setErro(`Informe um desconto válido para ${item.nome}.`);
-
         return;
       }
 
@@ -348,30 +340,30 @@ function VendaForm({
         setErro(
           `O desconto de ${item.nome} não pode ser maior que o valor do item.`,
         );
-
         return;
       }
     }
 
     const descontoGeral = Number(desconto || 0);
-
     const acrescimoGeral = Number(acrescimo || 0);
 
     if (!Number.isFinite(descontoGeral) || descontoGeral < 0) {
       setErro("Informe um desconto geral válido.");
-
       return;
     }
 
     if (!Number.isFinite(acrescimoGeral) || acrescimoGeral < 0) {
       setErro("Informe um acréscimo válido.");
+      return;
+    }
 
+    if (descontoGeral > subtotal + acrescimoGeral) {
+      setErro("O desconto geral não pode deixar o total da venda negativo.");
       return;
     }
 
     if (total <= 0) {
       setErro("O total da venda deve ser maior que zero.");
-
       return;
     }
 
@@ -380,7 +372,6 @@ function VendaForm({
 
       if (!Number.isInteger(parcelasNumero) || parcelasNumero < 1) {
         setErro("Informe uma quantidade de parcelas válida.");
-
         return;
       }
     }
@@ -388,24 +379,26 @@ function VendaForm({
     if (tipoPagamento === "dinheiro") {
       const recebido = Number(valorRecebido);
 
-      if (!Number.isFinite(recebido)) {
+      if (
+        valorRecebido === "" ||
+        !Number.isFinite(recebido) ||
+        recebido < 0
+      ) {
         setErro("Informe o valor recebido.");
-
         return;
       }
 
       if (recebido < total) {
-        setErro("O valor recebido é menor que o total da venda.");
-
+        setErro(
+          `Ainda faltam ${formatarMoeda(total - recebido)} para concluir a venda.`,
+        );
         return;
       }
     }
 
     const pagamento = {
       tipo: tipoPagamento,
-
       valor: total,
-
       parcelas: tipoPagamento === "credito" ? Number(parcelas) : 1,
     };
 
@@ -418,46 +411,36 @@ function VendaForm({
     try {
       const resultado = await finalizarVenda({
         empresaId,
-
         itens: itens.map((item) => ({
           produtoId: item.produtoId,
-
           quantidade: Number(item.quantidade),
-
           desconto: Number(item.desconto || 0),
         })),
-
         pagamentos: [pagamento],
-
         desconto: descontoGeral,
-
         acrescimo: acrescimoGeral,
-
         observacoes,
       });
 
       const vendaFinalizada = {
         resultado,
-
-        itens: itens.map((item) => ({
-          ...item,
-        })),
-
+        itens: itens.map((item) => ({ ...item })),
         subtotal,
-
         desconto: descontoGeral,
-
         acrescimo: acrescimoGeral,
-
         total,
-
         pagamento: {
           ...pagamento,
-          troco,
+          valorRecebido:
+            tipoPagamento === "dinheiro"
+              ? Number(valorRecebido)
+              : null,
+          troco:
+            tipoPagamento === "dinheiro"
+              ? resumoDinheiro.troco
+              : 0,
         },
-
         observacoes,
-
         finalizadaEm: new Date().toISOString(),
       };
 
@@ -471,14 +454,21 @@ function VendaForm({
     } catch (error) {
       console.error("Erro ao finalizar venda:", error);
 
-      setErro(error?.message || "Não foi possível finalizar a venda.");
+      setErro(
+        error?.message ||
+          "Não foi possível finalizar a venda.",
+      );
     } finally {
       setFinalizando(false);
     }
   }
 
   const conteudo = (
-    <div className={`venda-form ${embutido ? "venda-form-embutido" : ""}`}>
+    <div
+      className={`venda-form ${
+        embutido ? "venda-form-embutido" : ""
+      }`}
+    >
       {erro && (
         <div className="venda-form-erro" role="alert">
           {erro}
@@ -489,15 +479,12 @@ function VendaForm({
         <div className="venda-form-caixa-header">
           <div>
             <span>CAIXA</span>
-
             <h2>Nova venda</h2>
-
             <p>Adicione os produtos e finalize o pagamento.</p>
           </div>
 
           <div className="venda-form-caixa-status">
             <span>Itens</span>
-
             <strong>{itens.length}</strong>
           </div>
         </div>
@@ -509,7 +496,6 @@ function VendaForm({
             <div className="venda-form-secao-header">
               <div>
                 <h3>Produtos</h3>
-
                 <p>Adicione os produtos que fazem parte da venda.</p>
               </div>
             </div>
@@ -546,7 +532,9 @@ function VendaForm({
             </div>
 
             {itens.length === 0 ? (
-              <div className="venda-form-vazio">Nenhum produto adicionado.</div>
+              <div className="venda-form-vazio">
+                Nenhum produto adicionado.
+              </div>
             ) : (
               <div className="venda-form-itens">
                 {itens.map((item) => {
@@ -554,12 +542,16 @@ function VendaForm({
                     Number(item.precoVenda) * Number(item.quantidade) -
                     Number(item.desconto || 0);
 
+                  const passoQuantidade = obterPassoQuantidade(item.unidade);
+
                   return (
-                    <article key={item.produtoId} className="venda-form-item">
+                    <article
+                      key={item.produtoId}
+                      className="venda-form-item"
+                    >
                       <div className="venda-form-item-topo">
                         <div>
                           <strong>{item.nome}</strong>
-
                           <span>
                             Estoque disponível: {item.estoqueAtual}{" "}
                             {item.unidade}
@@ -582,9 +574,12 @@ function VendaForm({
                           <div className="venda-form-quantidade">
                             <button
                               type="button"
-                              onClick={() => diminuirQuantidade(item.produtoId)}
+                              onClick={() =>
+                                diminuirQuantidade(item.produtoId)
+                              }
                               disabled={
-                                finalizando || Number(item.quantidade) <= 1
+                                finalizando ||
+                                Number(item.quantidade) <= passoQuantidade
                               }
                               aria-label={`Diminuir quantidade de ${item.nome}`}
                             >
@@ -593,8 +588,8 @@ function VendaForm({
 
                             <input
                               type="number"
-                              min="1"
-                              step="1"
+                              min={passoQuantidade}
+                              step={passoQuantidade}
                               value={item.quantidade}
                               onChange={(event) =>
                                 atualizarQuantidade(
@@ -607,7 +602,9 @@ function VendaForm({
 
                             <button
                               type="button"
-                              onClick={() => aumentarQuantidade(item.produtoId)}
+                              onClick={() =>
+                                aumentarQuantidade(item.produtoId)
+                              }
                               disabled={
                                 finalizando ||
                                 Number(item.quantidade) >=
@@ -622,7 +619,6 @@ function VendaForm({
 
                         <label>
                           <span>Preço</span>
-
                           <input
                             type="text"
                             value={formatarMoeda(item.precoVenda)}
@@ -632,7 +628,6 @@ function VendaForm({
 
                         <label>
                           <span>Desconto</span>
-
                           <input
                             type="number"
                             min="0"
@@ -650,7 +645,6 @@ function VendaForm({
 
                         <div className="venda-form-item-total">
                           <span>Total</span>
-
                           <strong>{formatarMoeda(totalItem)}</strong>
                         </div>
                       </div>
@@ -667,26 +661,28 @@ function VendaForm({
             <div className="venda-form-grid">
               <label>
                 <span>Desconto geral</span>
-
                 <input
                   type="number"
                   min="0"
                   step="0.01"
                   value={desconto}
-                  onChange={(event) => setDesconto(event.target.value)}
+                  onChange={(event) =>
+                    setDesconto(event.target.value)
+                  }
                   disabled={finalizando}
                 />
               </label>
 
               <label>
                 <span>Acréscimo</span>
-
                 <input
                   type="number"
                   min="0"
                   step="0.01"
                   value={acrescimo}
-                  onChange={(event) => setAcrescimo(event.target.value)}
+                  onChange={(event) =>
+                    setAcrescimo(event.target.value)
+                  }
                   disabled={finalizando}
                 />
               </label>
@@ -696,19 +692,16 @@ function VendaForm({
           <section className="venda-form-secao">
             <label className="venda-form-observacoes">
               <span>Observações</span>
-
               <textarea
                 value={observacoes}
-                onChange={(event) => setObservacoes(event.target.value)}
+                onChange={(event) =>
+                  setObservacoes(event.target.value)
+                }
                 maxLength={1000}
                 placeholder="Informações adicionais sobre a venda."
                 disabled={finalizando}
               />
-
-              <small>
-                {observacoes.length}
-                /1000
-              </small>
+              <small>{observacoes.length}/1000</small>
             </label>
           </section>
         </div>
@@ -724,12 +717,8 @@ function VendaForm({
                 <select
                   value={tipoPagamento}
                   onChange={(event) => {
-                    const novoTipo = event.target.value;
-
-                    setTipoPagamento(novoTipo);
-
+                    setTipoPagamento(event.target.value);
                     setValorRecebido("");
-
                     setParcelas("1");
                   }}
                   disabled={finalizando}
@@ -745,13 +734,14 @@ function VendaForm({
               {tipoPagamento === "credito" && (
                 <label>
                   <span>Parcelas</span>
-
                   <input
                     type="number"
                     min="1"
                     step="1"
                     value={parcelas}
-                    onChange={(event) => setParcelas(event.target.value)}
+                    onChange={(event) =>
+                      setParcelas(event.target.value)
+                    }
                     disabled={finalizando}
                   />
                 </label>
@@ -761,22 +751,43 @@ function VendaForm({
                 <>
                   <label>
                     <span>Valor recebido</span>
-
                     <input
                       type="number"
                       min="0"
                       step="0.01"
                       value={valorRecebido}
-                      onChange={(event) => setValorRecebido(event.target.value)}
-                      placeholder={formatarMoeda(total)}
+                      onChange={(event) =>
+                        setValorRecebido(event.target.value)
+                      }
+                      placeholder="Ex.: 100,00"
                       disabled={finalizando}
                     />
                   </label>
 
-                  <div className="venda-form-troco">
-                    <span>Troco</span>
+                  <div
+                    className={`venda-form-troco ${
+                      resumoDinheiro.informado &&
+                      !resumoDinheiro.suficiente
+                        ? "venda-form-troco-faltando"
+                        : ""
+                    }`}
+                  >
+                    <span>
+                      {!resumoDinheiro.informado ||
+                      resumoDinheiro.suficiente
+                        ? "Troco"
+                        : "Faltam"}
+                    </span>
 
-                    <strong>{formatarMoeda(troco)}</strong>
+                    <strong>
+                      {formatarMoeda(
+                        resumoDinheiro.informado
+                          ? resumoDinheiro.suficiente
+                            ? resumoDinheiro.troco
+                            : resumoDinheiro.faltante
+                          : 0,
+                      )}
+                    </strong>
                   </div>
                 </>
               )}
@@ -786,25 +797,21 @@ function VendaForm({
           <section className="venda-form-resumo">
             <div>
               <span>Subtotal</span>
-
               <strong>{formatarMoeda(subtotal)}</strong>
             </div>
 
             <div>
               <span>Desconto</span>
-
               <strong>- {formatarMoeda(desconto)}</strong>
             </div>
 
             <div>
               <span>Acréscimo</span>
-
               <strong>+ {formatarMoeda(acrescimo)}</strong>
             </div>
 
             <div className="venda-form-total">
               <span>Total</span>
-
               <strong>{formatarMoeda(total)}</strong>
             </div>
           </section>
@@ -840,7 +847,11 @@ function VendaForm({
   }
 
   return (
-    <Modal aberto={aberto} titulo="Nova venda" onFechar={handleCancelar}>
+    <Modal
+      aberto={aberto}
+      titulo="Nova venda"
+      onFechar={handleCancelar}
+    >
       {conteudo}
     </Modal>
   );

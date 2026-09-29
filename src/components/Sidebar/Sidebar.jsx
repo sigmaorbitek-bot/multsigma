@@ -26,6 +26,11 @@ const itensDisponiveis = [
     icone: "🛒",
     nome: "Vendas",
   },
+  {
+    to: "/painel/relatorios",
+    icone: "📄",
+    nome: "Relatórios",
+  },
 ];
 
 const itensEmBreve = [
@@ -52,10 +57,6 @@ const itensEmBreve = [
   {
     icone: "💰",
     nome: "Financeiro",
-  },
-  {
-    icone: "📄",
-    nome: "Relatórios",
   },
   {
     icone: "⚙️",
